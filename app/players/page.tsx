@@ -42,7 +42,7 @@ export default function Players() {
                     <button onClick={() => {
                         const newPlayer: Player = { id: uuidv4(), name: 'New Player', active: false };
                         players?.push(newPlayer);
-                        savePlayersMutation.mutate(players);
+                        savePlayersMutation.mutate(players!);
                     }}>Add Player</button>
                 </footer>
             </div>
