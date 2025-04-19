@@ -28,8 +28,8 @@ export default function Players() {
                 <h1 className='text-3xl px-2'>Players</h1>
             </header>
             {players?.map((player: Player) => (
-                <PlayerComponent key={player.id} player={player} onPressedChange={(pressed) => {
-                    player.active = pressed;
+                <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
+                    player = {...player, ...newPlayer};
                     savePlayersMutation.mutate(players);
                 }} />
             ))}
