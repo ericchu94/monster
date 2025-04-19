@@ -1,11 +1,13 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { PlayerComponent } from '@/components/player';
+import { Player } from '@/models/player';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
-type Player = {
-    id: string;
-    name: string;
-};
+async function savePlayers(updatedPlayers: Player[]): Promise<Player[]> {
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    return updatedPlayers;
+}
 
 export default function Players() {
     const { data: players, isLoading, error } = useQuery<Player[]>({
@@ -13,15 +15,23 @@ export default function Players() {
         queryFn: fetchPlayers,
     });
 
+    const savePlayersMutation = useMutation({
+        mutationFn: savePlayers,
+    });
+
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading players</div>;
 
     return (
-        <ul>
-            {players.map((player: Player) => (
-                <li key={player.id}>{player.name}</li>
+        <>
+            <header>Players</header>
+            {players?.map((player: Player) => (
+                <PlayerComponent key={player.id} player={player} onPressedChange={(pressed) => {
+                    player.active = pressed;
+                    savePlayersMutation.mutate(players);
+                }} />
             ))}
-        </ul>
+        </>
     );
 }
 
