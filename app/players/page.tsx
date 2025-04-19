@@ -4,6 +4,8 @@ import { PlayerComponent } from '@/components/player';
 import { Player } from '@/models/player';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
+import { v4 as uuidv4 } from 'uuid';
+
 async function savePlayers(updatedPlayers: Player[]): Promise<Player[]> {
     localStorage.setItem('players', JSON.stringify(updatedPlayers));
     return updatedPlayers;
@@ -24,15 +26,26 @@ export default function Players() {
 
     return (
         <>
-            <header>
-                <h1 className='text-3xl px-2'>Players</h1>
-            </header>
-            {players?.map((player: Player) => (
-                <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
-                    player = {...player, ...newPlayer};
-                    savePlayersMutation.mutate(players);
-                }} />
-            ))}
+            <div className='flex flex-col w-full h-full'>
+                <header>
+                    <h1 className='text-3xl px-2'>Players</h1>
+                </header>
+                <div>
+                {players?.map((player: Player) => (
+                    <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
+                        player = {...player, ...newPlayer};
+                        savePlayersMutation.mutate(players);
+                    }} />
+                ))}
+                </div>
+                <footer>
+                    <button onClick={() => {
+                        const newPlayer: Player = { id: uuidv4(), name: 'New Player', active: false };
+                        players?.push(newPlayer);
+                        savePlayersMutation.mutate(players);
+                    }}>Add Player</button>
+                </footer>
+            </div>
         </>
     );
 }
