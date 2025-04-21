@@ -63,7 +63,7 @@ async function generateMatch(): Promise<Match[]> {
 
 function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (
-        <Toggle pressed={winner} variant="outline" className="self-stretch grow inline-flex items-center justify-center flex-col border rounded-md m-2 p-2" onPressedChange={onPressedChange}>
+        <Toggle pressed={winner} variant="outline" className="self-stretch h-auto grow flex flex-col items-center justify-center border rounded-md m-2 p-2" onPressedChange={onPressedChange}>
             {team.map(player => (
                 <div key={player.id}>{player.name}</div>
             ))}
@@ -73,7 +73,7 @@ function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winn
 
 function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchChange: (match: Match) => void, ref?: React.Ref<HTMLDivElement> }) {
     return (
-        <div ref={ref} className="flex flex-col sm:flex-row w-full h-full items-center justify-center snap-start">
+        <div ref={ref} className="flex flex-col sm:flex-row h-full items-center justify-center snap-start">
             <TeamComponent team={match.team1} winner={match.result == MatchResult.Team1Win} onPressedChange={(pressed) => {
                 match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
                 onMatchChange(match);
@@ -139,7 +139,7 @@ export default function Matches() {
     return (
         <>
             <div className="flex flex-col w-full h-full">
-                <div className="grow h-full overflow-y-auto snap-y snap-mandatory">
+                <div className="grow overflow-auto snap-y snap-mandatory basis-0">
                     {matches!.length > 0 ? (
                         matches!.map((match: Match, index: number) => (
                             <MatchComponent
