@@ -50,7 +50,7 @@ export default function Players() {
     );
 }
 
-async function fetchPlayers(): Promise<Player[]> {
+export async function fetchPlayers(): Promise<Player[]> {
     const players = localStorage.getItem('players');
     return players ? JSON.parse(players) : [];
 }
