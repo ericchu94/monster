@@ -6,6 +6,7 @@ import { fetchPlayers } from '../players/page';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 
 enum MatchResult {
     NotPlayed = 'NotPlayed', // Default state for matches not played
@@ -25,6 +26,10 @@ type Match = {
 async function fetchMatches(): Promise<Match[]> {
     const storedMatches = localStorage.getItem('matches');
     return storedMatches ? JSON.parse(storedMatches) : [];
+}
+async function saveMatches(matches: Match[]): Promise<Match[]> {
+    localStorage.setItem('matches', JSON.stringify(matches));
+    return matches;
 }
 
 async function generateMatch(): Promise<Match[]> {
@@ -52,26 +57,31 @@ async function generateMatch(): Promise<Match[]> {
     };
     matches.push(match);
 
-    localStorage.setItem('matches', JSON.stringify(matches));
-    return matches;
+    return await saveMatches(matches);
 }
 
-function TeamComponent({ team }: { team: Player[] }) {
+function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (
-        <div className='self-stretch grow inline-flex items-center justify-center flex-col border rounded-md m-2 p-2 '>
+        <Toggle pressed={winner} variant="outline" className="self-stretch grow inline-flex items-center justify-center flex-col border rounded-md m-2 p-2" onPressedChange={onPressedChange}>
             {team.map(player => (
                 <div key={player.id}>{player.name}</div>
             ))}
-        </div>
+        </Toggle>
     );
 }
 
-function MatchComponent({ match }: { match: Match }) {
+function MatchComponent({ match, onMatchChange }: { match: Match, onMatchChange: (match: Match) => void }) {
     return (
         <div className="flex flex-col sm:flex-row w-full h-full items-center justify-center snap-start">
-            <TeamComponent team={match.team1} />
+            <TeamComponent team={match.team1} winner={match.result == MatchResult.Team1Win} onPressedChange={(pressed) => {
+                match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
+                onMatchChange(match);
+            }} />
             <Swords />
-            <TeamComponent team={match.team2} />
+            <TeamComponent team={match.team2} winner={match.result == MatchResult.Team2Win} onPressedChange={(pressed) => {
+                match.result = pressed ? MatchResult.Team2Win : MatchResult.NotPlayed;
+                onMatchChange(match);
+            }} />
         </div>
     );
 }
@@ -83,7 +93,7 @@ export default function Matches() {
         queryFn: fetchMatches,
     });
 
-    const mutation = useMutation({
+    const generateMatchMutation = useMutation({
         mutationFn: generateMatch,
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -92,9 +102,15 @@ export default function Matches() {
         },
     });
 
-    const handleGenerateMatch = () => {
-        mutation.mutate();
-    };
+    const saveMatchesMutation = useMutation({
+        mutationFn: saveMatches,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['matches'],
+            }); // Refetch matches
+        },
+    });
+
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading matches</div>;
@@ -105,13 +121,18 @@ export default function Matches() {
                 <div className="grow h-full overflow-y-auto snap-y snap-mandatory">
                     {matches!.length > 0 ? (
                         matches!.map((match: Match) => (
-                            <MatchComponent key={match.id} match={match} />
+                            <MatchComponent key={match.id} match={match} onMatchChange={(match) => {
+                                match.result = match.result;
+                                saveMatchesMutation.mutate(matches!);
+                            }} />
                         ))
                     ) : (
                         <div>No matches found</div>
                     )}
                 </div>
-                <Button variant="outline" onClick={handleGenerateMatch}>
+                <Button variant="outline" onClick={() => {
+                    generateMatchMutation.mutate();
+                }}>
                     <Plus />
                 </Button>
             </div>
