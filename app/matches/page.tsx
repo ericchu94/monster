@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
+import { useRef, useEffect } from 'react';
 
 enum MatchResult {
     NotPlayed = 'NotPlayed', // Default state for matches not played
@@ -70,9 +71,9 @@ function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winn
     );
 }
 
-function MatchComponent({ match, onMatchChange }: { match: Match, onMatchChange: (match: Match) => void }) {
+function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchChange: (match: Match) => void, ref?: React.Ref<HTMLDivElement> }) {
     return (
-        <div className="flex flex-col sm:flex-row w-full h-full items-center justify-center snap-start">
+        <div ref={ref} className="flex flex-col sm:flex-row w-full h-full items-center justify-center snap-start">
             <TeamComponent team={match.team1} winner={match.result == MatchResult.Team1Win} onPressedChange={(pressed) => {
                 match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
                 onMatchChange(match);
@@ -111,6 +112,26 @@ export default function Matches() {
         },
     });
 
+    const lastMatchRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (lastMatchRef.current) {
+            lastMatchRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [matches]);
+
+    const handleMatchChange = (updatedMatch: Match) => {
+        const allMatches = matches!.map(match =>
+            match.id === updatedMatch.id ? updatedMatch : match
+        );
+        saveMatchesMutation.mutate(allMatches);
+
+        // Check if the last match is concluded
+        const lastMatch = allMatches[allMatches.length - 1];
+        if (lastMatch.result !== MatchResult.NotPlayed) {
+            generateMatchMutation.mutate();
+        }
+    };
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading matches</div>;
@@ -120,11 +141,13 @@ export default function Matches() {
             <div className="flex flex-col w-full h-full">
                 <div className="grow h-full overflow-y-auto snap-y snap-mandatory">
                     {matches!.length > 0 ? (
-                        matches!.map((match: Match) => (
-                            <MatchComponent key={match.id} match={match} onMatchChange={(match) => {
-                                match.result = match.result;
-                                saveMatchesMutation.mutate(matches!);
-                            }} />
+                        matches!.map((match: Match, index: number) => (
+                            <MatchComponent
+                                key={match.id}
+                                match={match}
+                                onMatchChange={handleMatchChange}
+                                ref={index === matches!.length - 1 ? lastMatchRef : undefined}
+                            />
                         ))
                     ) : (
                         <div>No matches found</div>
