@@ -58,7 +58,7 @@ async function generateMatch(): Promise<Match[]> {
 
 function TeamComponent({ team }: { team: Player[] }) {
     return (
-        <div className='grow inline-flex items-center justify-center flex-col border rounded-md m-10 p-10'>
+        <div className='self-stretch grow inline-flex items-center justify-center flex-col border rounded-md m-2 p-2 '>
             {team.map(player => (
                 <div key={player.id}>{player.name}</div>
             ))}
@@ -68,7 +68,7 @@ function TeamComponent({ team }: { team: Player[] }) {
 
 function MatchComponent({ match }: { match: Match }) {
     return (
-        <div className="flex w-full h-full  items-center justify-center">
+        <div className="flex flex-col sm:flex-row w-full h-full items-center justify-center snap-start">
             <TeamComponent team={match.team1} />
             <Swords />
             <TeamComponent team={match.team2} />
@@ -86,7 +86,9 @@ export default function Matches() {
     const mutation = useMutation({
         mutationFn: generateMatch,
         onSuccess: () => {
-            queryClient.invalidateQueries(['matches']); // Refetch matches
+            queryClient.invalidateQueries({
+                queryKey: ['matches'],
+            }); // Refetch matches
         },
     });
 
@@ -100,7 +102,7 @@ export default function Matches() {
     return (
         <>
             <div className="flex flex-col w-full h-full">
-                <div className="flex flex-col grow">
+                <div className="grow h-full overflow-y-auto snap-y snap-mandatory">
                     {matches!.length > 0 ? (
                         matches!.map((match: Match) => (
                             <MatchComponent key={match.id} match={match} />
@@ -109,7 +111,7 @@ export default function Matches() {
                         <div>No matches found</div>
                     )}
                 </div>
-                <Button onClick={handleGenerateMatch}>
+                <Button variant="outline" onClick={handleGenerateMatch}>
                     <Plus />
                 </Button>
             </div>

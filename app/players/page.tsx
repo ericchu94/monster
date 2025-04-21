@@ -20,6 +20,11 @@ export default function Players() {
 
     const savePlayersMutation = useMutation({
         mutationFn: savePlayers,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['players'],
+            }); // Refetch matches
+        },
     });
 
     if (isLoading) return <div>Loading...</div>;
