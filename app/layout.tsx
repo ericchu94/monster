@@ -32,9 +32,11 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <SidebarProvider>
             <AppSidebar />
-            <main className="w-full">
+            <main className="flex w-full flex-col">
               <SidebarTrigger />
-              {children}
+              <div className="grow">
+                {children}
+              </div>
             </main>
           </SidebarProvider>
         </QueryClientProvider>

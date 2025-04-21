@@ -4,7 +4,7 @@ import { Player } from '@/models/player';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { fetchPlayers } from '../players/page';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus } from 'lucide-react';
+import { Plus, Sword, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 enum MatchResult {
@@ -32,7 +32,7 @@ async function generateMatch(): Promise<Match[]> {
 
     let players = await fetchPlayers();
     players = players.filter((player: Player) => player.active);
-    
+
     if (players.length < 4) {
         return matches;
     }
@@ -40,7 +40,7 @@ async function generateMatch(): Promise<Match[]> {
     // shuffle 
     players = players.sort(() => Math.random() - 0.5);
 
-    const team1= players.slice(0, 2);
+    const team1 = players.slice(0, 2);
     const team2 = players.slice(2, 4);
 
     const match: Match = {
@@ -54,6 +54,26 @@ async function generateMatch(): Promise<Match[]> {
 
     localStorage.setItem('matches', JSON.stringify(matches));
     return matches;
+}
+
+function TeamComponent({ team }: { team: Player[] }) {
+    return (
+        <div className='grow inline-flex items-center justify-center flex-col border rounded-md m-10 p-10'>
+            {team.map(player => (
+                <div key={player.id}>{player.name}</div>
+            ))}
+        </div>
+    );
+}
+
+function MatchComponent({ match }: { match: Match }) {
+    return (
+        <div className="flex w-full h-full  items-center justify-center">
+            <TeamComponent team={match.team1} />
+            <Swords />
+            <TeamComponent team={match.team2} />
+        </div>
+    );
 }
 
 export default function Matches() {
@@ -80,13 +100,15 @@ export default function Matches() {
     return (
         <>
             <div className="flex flex-col w-full h-full">
-                {matches!.length > 0 ? (
-                    matches!.map((match: Match) => (
-                        <div key={match.id}>{JSON.stringify(match)}</div>
-                    ))
-                ) : (
-                    <div>No matches found</div>
-                )}
+                <div className="flex flex-col grow">
+                    {matches!.length > 0 ? (
+                        matches!.map((match: Match) => (
+                            <MatchComponent key={match.id} match={match} />
+                        ))
+                    ) : (
+                        <div>No matches found</div>
+                    )}
+                </div>
                 <Button onClick={handleGenerateMatch}>
                     <Plus />
                 </Button>
