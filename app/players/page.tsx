@@ -3,7 +3,7 @@
 import { EditPlayerDialog } from '@/components/edit-player-dialog';
 import { PlayerComponent } from '@/components/player';
 import { Player } from '@/models/player';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,6 +13,8 @@ async function savePlayers(updatedPlayers: Player[]): Promise<Player[]> {
 }
 
 export default function Players() {
+    const queryClient = useQueryClient();
+
     const { data: players, isLoading, error } = useQuery<Player[]>({
         queryKey: ['players'],
         queryFn: fetchPlayers,
@@ -36,7 +38,7 @@ export default function Players() {
                 <header>
                     <h1 className='text-3xl px-2'>
                         Players
-                        <EditPlayerDialog mode='create' player={{ id: uuidv4(), name: '', active: false }} onPlayerChange={(newPlayer) => {
+                        <EditPlayerDialog mode='create' player={{ id: uuidv4(), name: '', active: true }} onPlayerChange={(newPlayer) => {
                             players?.push(newPlayer);
                             savePlayersMutation.mutate(players!);
                         }} />

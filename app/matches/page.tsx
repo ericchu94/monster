@@ -4,7 +4,7 @@ import { Player } from '@/models/player';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { fetchPlayers } from '../players/page';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, Sword, Swords } from 'lucide-react';
+import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 enum MatchResult {
