@@ -2,12 +2,11 @@
 
 import { Player } from '@/models/player';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { fetchPlayers } from '../players/page';
-import { v4 as uuidv4 } from 'uuid';
 import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
+import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
 
 enum MatchResult {
     NotPlayed = 'NotPlayed', // Default state for matches not played
@@ -23,43 +22,6 @@ type Match = {
     result: MatchResult; // Use enum for result
     createdAt: string; // Add created timestamp
 };
-
-async function fetchMatches(): Promise<Match[]> {
-    const storedMatches = localStorage.getItem('matches');
-    return storedMatches ? JSON.parse(storedMatches) : [];
-}
-async function saveMatches(matches: Match[]): Promise<Match[]> {
-    localStorage.setItem('matches', JSON.stringify(matches));
-    return matches;
-}
-
-async function generateMatch(): Promise<Match[]> {
-    const matches = await fetchMatches();
-
-    let players = await fetchPlayers();
-    players = players.filter((player: Player) => player.active);
-
-    if (players.length < 4) {
-        return matches;
-    }
-
-    // shuffle 
-    players = players.sort(() => Math.random() - 0.5);
-
-    const team1 = players.slice(0, 2);
-    const team2 = players.slice(2, 4);
-
-    const match: Match = {
-        id: uuidv4(),
-        team1,
-        team2,
-        result: MatchResult.NotPlayed,
-        createdAt: new Date().toISOString(),
-    };
-    matches.push(match);
-
-    return await saveMatches(matches);
-}
 
 function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (

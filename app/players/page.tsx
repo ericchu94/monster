@@ -4,13 +4,9 @@ import { EditPlayerDialog } from '@/components/edit-player-dialog';
 import { PlayerComponent } from '@/components/player';
 import { Player } from '@/models/player';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchPlayers, savePlayers } from '@/services/playerService'; // Import from new file
 
 import { v4 as uuidv4 } from 'uuid';
-
-async function savePlayers(updatedPlayers: Player[]): Promise<Player[]> {
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
-    return updatedPlayers;
-}
 
 export default function Players() {
     const queryClient = useQueryClient();
@@ -55,9 +51,4 @@ export default function Players() {
             </div>
         </>
     );
-}
-
-export async function fetchPlayers(): Promise<Player[]> {
-    const players = localStorage.getItem('players');
-    return players ? JSON.parse(players) : [];
 }
