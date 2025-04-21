@@ -1,5 +1,6 @@
 'use client';
 
+import { EditPlayerDialog } from '@/components/edit-player-dialog';
 import { PlayerComponent } from '@/components/player';
 import { Player } from '@/models/player';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -28,7 +29,13 @@ export default function Players() {
         <>
             <div className='flex flex-col w-full h-full'>
                 <header>
-                    <h1 className='text-3xl px-2'>Players</h1>
+                    <h1 className='text-3xl px-2'>
+                        Players
+                        <EditPlayerDialog mode='create' player={{ id: uuidv4(), name: '', active: false }} onPlayerChange={(newPlayer) => {
+                            players?.push(newPlayer);
+                            savePlayersMutation.mutate(players!);
+                        }} />
+                    </h1>
                 </header>
                 <div>
                 {players?.map((player: Player) => (
@@ -38,13 +45,6 @@ export default function Players() {
                     }} />
                 ))}
                 </div>
-                <footer>
-                    <button onClick={() => {
-                        const newPlayer: Player = { id: uuidv4(), name: 'New Player', active: false };
-                        players?.push(newPlayer);
-                        savePlayersMutation.mutate(players!);
-                    }}>Add Player</button>
-                </footer>
             </div>
         </>
     );
