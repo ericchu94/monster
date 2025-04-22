@@ -6,6 +6,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from "@/components/theme-provider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,17 +35,24 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryClientProvider client={queryClient}>
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="flex w-full flex-col">
-              <SidebarTrigger className="cursor-pointer" />
-              <div className="grow">
-                {children}
-              </div>
-            </main>
-          </SidebarProvider>
-        </QueryClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryClientProvider client={queryClient}>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex w-full flex-col">
+                <SidebarTrigger className="cursor-pointer" />
+                <div className="grow">
+                  {children}
+                </div>
+              </main>
+            </SidebarProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
