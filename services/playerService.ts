@@ -9,3 +9,7 @@ export async function savePlayers(updatedPlayers: Player[]): Promise<Player[]> {
     localStorage.setItem('players', JSON.stringify(updatedPlayers));
     return updatedPlayers;
 }
+
+export async function clearPlayers(): Promise<void> {
+    localStorage.removeItem('players');
+}

@@ -54,3 +54,7 @@ export async function generateMatch(): Promise<Match[]> {
 
     return await saveMatches(matches);
 }
+
+export async function clearMatches(): Promise<void> {
+    localStorage.removeItem('matches');
+}
