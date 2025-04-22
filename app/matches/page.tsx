@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
 import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
+import { Player } from '@/models/player';
 
 function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (
