@@ -19,11 +19,6 @@ const items = [
     icon: Home,
   },
   {
-    title: "Events",
-    url: "/events",
-    icon: Calendar,
-  },
-  {
     title: "Players",
     url: "/players",
     icon: User,
@@ -32,11 +27,6 @@ const items = [
     title: "Matches",
     url: "/matches",
     icon: Swords,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
   },
 ]
 
