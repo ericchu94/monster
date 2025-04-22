@@ -13,7 +13,7 @@ function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winn
     return (
         <Toggle pressed={winner} variant="outline" className="self-stretch basis-0 h-auto grow flex flex-col items-center justify-center cursor-pointer border rounded-md m-2 p-2" onPressedChange={onPressedChange}>
             {team.map(player => (
-                <div key={player.id}>{player.name}</div>
+                <div key={player.id} className='text-4xl'>{player.name}</div>
             ))}
         </Toggle>
     );
@@ -103,7 +103,7 @@ export default function Matches() {
                 </div>
                 <Button variant="outline" onClick={() => {
                     generateMatchMutation.mutate();
-                }}>
+                }} className="cursor-pointer">
                     <Plus />
                 </Button>
             </div>
