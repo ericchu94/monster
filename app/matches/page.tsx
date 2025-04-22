@@ -1,27 +1,12 @@
 'use client';
 
-import { Player } from '@/models/player';
+import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
 import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
-
-enum MatchResult {
-    NotPlayed = 'NotPlayed', // Default state for matches not played
-    Team1Win = 'Team1Win',
-    Team2Win = 'Team2Win',
-    Draw = 'Draw',
-}
-
-type Match = {
-    id: string;
-    team1: Player[];
-    team2: Player[];
-    result: MatchResult; // Use enum for result
-    createdAt: string; // Add created timestamp
-};
 
 function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (
