@@ -21,7 +21,7 @@ function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winn
 
 function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchChange: (match: Match) => void, ref?: React.Ref<HTMLDivElement> }) {
     return (
-        <div ref={ref} className="flex flex-col sm:flex-row h-full items-center justify-center snap-start">
+        <div ref={ref} className="flex portrait:flex-col landscape:flex-row h-full items-center justify-center snap-start">
             <TeamComponent team={match.team1} winner={match.result == MatchResult.Team1Win} onPressedChange={(pressed) => {
                 match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
                 onMatchChange(match);
