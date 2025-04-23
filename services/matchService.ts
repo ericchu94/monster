@@ -38,7 +38,7 @@ export async function generateMatch(): Promise<Match[]> {
     }
 
     // Shuffle players
-    players = players.sort(() => Math.random() - 0.5);
+    shuffle(players);
 
     const team1 = players.slice(0, 2);
     const team2 = players.slice(2, 4);
@@ -57,4 +57,21 @@ export async function generateMatch(): Promise<Match[]> {
 
 export async function clearMatches(): Promise<void> {
     localStorage.removeItem('matches');
+}
+
+function shuffle<T>(array: T[]): T[] {
+    // Fisher-Yates shuffle algorithm
+    let currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+        // Pick a remaining element...
+        const randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+    return array;
 }
