@@ -40,7 +40,7 @@ export default function Players() {
                         }} />
                     </h1>
                 </header>
-                <div className='flex'>
+                <div className='flex flex-wrap'>
                     {players?.map((player: Player, index) => (
                         <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
                             players[index] = newPlayer;
