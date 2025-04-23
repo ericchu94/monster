@@ -101,9 +101,9 @@ export default function Matches() {
                         <div>No matches found</div>
                     )}
                 </div>
-                <Button variant="outline" onClick={() => {
+                <Button variant="outline" className="m-2 cursor-pointer" onClick={() => {
                     generateMatchMutation.mutate();
-                }} className="cursor-pointer">
+                }}>
                     <Plus />
                 </Button>
             </div>
