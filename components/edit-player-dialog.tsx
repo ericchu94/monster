@@ -2,48 +2,70 @@ import { useState } from "react";
 import { Player } from "@/models/player";
 import { Button } from "@/components/ui/button";
 import { Edit, Plus } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
-export function EditPlayerDialog({ 
-    player, 
-    onPlayerChange, 
-    mode = "edit" 
-}: { 
-    player: Player, 
-    onPlayerChange?: (player: Player) => void, 
-    mode?: "edit" | "create" 
+export function EditPlayerDialog({
+    player,
+    onPlayerChange,
+    mode = "edit"
+}: {
+    player: Player,
+    onPlayerChange?: (player: Player) => void,
+    mode?: "edit" | "create"
 }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [name, setName] = useState(mode === "edit" ? player.name : "");
-
-    const onSave = () => {
-        const updatedPlayer = { ...player, name };
-        if (onPlayerChange) {
-            onPlayerChange(updatedPlayer);
-        }
-        setIsOpen(false);
-    };
+    const [open, setOpen] = useState(false);
 
     const button = mode === "edit" ? (
-        <Button onClick={() => setIsOpen(true)} variant="outline" className="h-16 w-16 my-2 rounded-l-none cursor-pointer border-l-0">
+        <Button variant="outline" className="h-16 w-16 my-2 rounded-l-none cursor-pointer border-l-0">
             <Edit />
         </Button>
     ) : (
-        <Button onClick={() => setIsOpen(true)} variant="outline" className="mx-2">
+        <Button variant="outline" className="mx-2">
             <Plus />
         </Button>
     );
 
+    const title = mode === "edit" ? "Edit Player" : "Create Player";
+
+    const handleSave = (event: React.FormEvent) => {
+        event.preventDefault();
+        const formData = new FormData(event.target as HTMLFormElement);
+        const name = formData.get("name") as string;
+        if (onPlayerChange) {
+            console.log("onPlayerChange", player, name, { ...player, name });
+            onPlayerChange({ ...player, name });
+        }
+        setOpen(false);
+    };
+
     return <>
-        {button}
-        {isOpen && <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-            <div className="bg-white p-4 rounded shadow">
-                <h2>{mode === "edit" ? "Edit Player" : "Create Player"}</h2>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="border p-2 rounded w-full" />
-                <div className="flex justify-end mt-4">
-                    <Button onClick={() => setIsOpen(false)} variant="secondary" className="mr-2">Cancel</Button>
-                    <Button onClick={onSave}>{mode === "edit" ? "Save" : "Create"}</Button>
-                </div>
-            </div>
-        </div>}
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild={true}>{button}</DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSave}>
+                    <Input
+                        type="text"
+                        name="name"
+                        defaultValue={player.name}
+                        placeholder="Name"
+                        className="mb-4"
+                    />
+                    <DialogFooter>
+                        <Button type="submit">Save</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     </>;
 }

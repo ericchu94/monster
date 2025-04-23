@@ -40,13 +40,13 @@ export default function Players() {
                         }} />
                     </h1>
                 </header>
-                <div>
-                {players?.map((player: Player) => (
-                    <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
-                        player = {...player, ...newPlayer};
-                        savePlayersMutation.mutate(players);
-                    }} />
-                ))}
+                <div className='flex'>
+                    {players?.map((player: Player, index) => (
+                        <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
+                            players[index] = newPlayer;
+                            savePlayersMutation.mutate(players);
+                        }} />
+                    ))}
                 </div>
             </div>
         </>
