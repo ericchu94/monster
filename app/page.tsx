@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      <div className="flex flex-col items-end justify-center m-20">
+      <div className="flex flex-col items-end justify-center mb-10">
         <h1 className="text-8xl">Monster</h1>
         <small>By Eric Chu</small>
       </div>
