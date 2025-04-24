@@ -2,7 +2,7 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Plus, Swords } from 'lucide-react';
+import { Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
