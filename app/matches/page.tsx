@@ -2,7 +2,7 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Swords } from 'lucide-react';
+import { Plus, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
@@ -104,7 +104,7 @@ export default function Matches() {
                 <Button variant="outline" className="m-2 cursor-pointer" onClick={() => {
                     generateMatchMutation.mutate();
                 }}>
-                    Skip
+                    {matches!.length === 0 || matches![matches!.length - 1].result !== MatchResult.NotPlayed ? <Plus /> : "Skip"}
                 </Button>
             </div>
         </>
