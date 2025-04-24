@@ -104,7 +104,7 @@ export default function Matches() {
                 <Button variant="outline" className="m-2 cursor-pointer" onClick={() => {
                     generateMatchMutation.mutate();
                 }}>
-                    {matches!.length === 0 || matches![matches!.length - 1].result !== MatchResult.NotPlayed ? <Plus /> : "Skip"}
+                    {matches!.length === 0 ? <Plus /> : "Skip"}
                 </Button>
             </div>
         </>
