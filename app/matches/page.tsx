@@ -11,7 +11,7 @@ import { Player } from '@/models/player';
 
 function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     return (
-        <Toggle pressed={winner} variant="outline" className="self-stretch basis-0 h-auto grow flex flex-col items-center justify-center cursor-pointer border rounded-md m-2 p-2 bg-input/10" onPressedChange={onPressedChange}>
+        <Toggle pressed={winner} variant="outline" className="self-stretch basis-0 h-auto grow flex flex-col items-center justify-center cursor-pointer border rounded-md m-2 p-2 bg-input/20" onPressedChange={onPressedChange}>
             {team.map(player => (
                 <div key={player.id} className='text-4xl'>{player.name}</div>
             ))}
