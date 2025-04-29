@@ -9,8 +9,8 @@ export enum MatchResult {
 
 export type Match = {
     id: string;
-    team1: Player[];
-    team2: Player[];
-    result: MatchResult; // Use enum for result
+    team1: string[]; // Store player IDs instead of Player objects
+    team2: string[]; // Store player IDs instead of Player objects
+    result: MatchResult;
     createdAt: string; // Add created timestamp
 };

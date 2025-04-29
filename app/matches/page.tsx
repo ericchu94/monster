@@ -8,11 +8,19 @@ import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
 import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
 import { Player } from '@/models/player';
+import { fetchPlayers } from '@/services/playerService'; // Import a service to fetch player details
 
-function TeamComponent({ team, winner, onPressedChange }: { team: Player[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
+function TeamComponent({ team, winner, onPressedChange }: { team: string[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
+    const { data: players } = useQuery({
+        queryKey: ['players'],
+        queryFn: fetchPlayers, // Fetch all players
+    });
+
+    const teamPlayers = players?.filter((player: Player) => team.includes(player.id)) || [];
+
     return (
         <Toggle pressed={winner} variant="outline" className="self-stretch basis-0 h-auto grow flex flex-col items-center justify-center cursor-pointer border rounded-md m-2 p-2 bg-input/20" onPressedChange={onPressedChange}>
-            {team.map(player => (
+            {teamPlayers.map(player => (
                 <div key={player.id} className='text-4xl'>{player.name}</div>
             ))}
         </Toggle>

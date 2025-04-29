@@ -1,21 +1,7 @@
 import { Player } from '@/models/player';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchPlayers } from '@/services/playerService';
-
-export enum MatchResult {
-    NotPlayed = 'NotPlayed',
-    Team1Win = 'Team1Win',
-    Team2Win = 'Team2Win',
-    Draw = 'Draw',
-}
-
-export type Match = {
-    id: string;
-    team1: Player[];
-    team2: Player[];
-    result: MatchResult;
-    createdAt: string;
-};
+import { Match, MatchResult } from '@/models/match';
 
 export async function fetchMatches(): Promise<Match[]> {
     const storedMatches = localStorage.getItem('matches');
@@ -30,18 +16,18 @@ export async function saveMatches(matches: Match[]): Promise<Match[]> {
 export async function generateMatch(): Promise<Match[]> {
     const matches = await fetchMatches();
 
-    let players = await fetchPlayers();
-    players = players.filter((player: Player) => player.active);
+    const players = await fetchPlayers();
+    const playerIds = players.filter((player: Player) => player.active).map((player: Player) => player.id);
 
-    if (players.length < 4) {
+    if (playerIds.length < 4) {
         return matches;
     }
 
     // Shuffle players
-    shuffle(players);
+    shuffle(playerIds);
 
-    const team1 = players.slice(0, 2);
-    const team2 = players.slice(2, 4);
+    const team1 = playerIds.slice(0, 2);
+    const team2 = playerIds.slice(2, 4);
 
     const match: Match = {
         id: uuidv4(),
