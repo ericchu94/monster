@@ -2,7 +2,7 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Plus, Swords } from 'lucide-react';
+import { Play, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect } from 'react';
@@ -92,27 +92,33 @@ export default function Matches() {
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading matches</div>;
 
+    if (matches?.length === 0) {
+        return (
+            <div className='flex w-full h-full items-center justify-center'>
+                <Button variant={'outline'} className="cursor-pointer h-auto w-auto" onClick={() => {
+                    generateMatchMutation.mutate();
+                }}>
+                    <Play className='m-2' size={128} />
+                </Button></div>);
+    }
+
     return (
         <>
             <div className="flex flex-col w-full h-full">
                 <div className="grow overflow-auto snap-y snap-mandatory basis-0">
-                    {matches!.length > 0 ? (
-                        matches!.map((match: Match, index: number) => (
-                            <MatchComponent
-                                key={match.id}
-                                match={match}
-                                onMatchChange={handleMatchChange}
-                                ref={index === matches!.length - 1 ? lastMatchRef : undefined}
-                            />
-                        ))
-                    ) : (
-                        <div>No matches found</div>
-                    )}
+                    {matches!.map((match: Match, index: number) => (
+                        <MatchComponent
+                            key={match.id}
+                            match={match}
+                            onMatchChange={handleMatchChange}
+                            ref={index === matches!.length - 1 ? lastMatchRef : undefined}
+                        />
+                    ))}
                 </div>
-                <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={() => {
+                <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent text-input" onClick={() => {
                     generateMatchMutation.mutate();
                 }}>
-                    {matches!.length === 0 ? <Plus /> : "Skip"}
+                    Skip
                 </Button>
             </div>
         </>

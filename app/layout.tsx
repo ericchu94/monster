@@ -46,7 +46,7 @@ export default function RootLayout({
               <AppSidebar />
               <main className="flex w-full flex-col">
                 <SidebarTrigger className="cursor-pointer" />
-                <div className="grow">
+                <div className="grow flex items-center justify-center">
                   {children}
                 </div>
               </main>
