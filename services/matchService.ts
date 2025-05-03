@@ -28,7 +28,51 @@ async function randomMatch(): Promise<Match> {
 }
 
 async function expectedMatch(): Promise<Match> {
-    throw new Error('NotImplementedError: Expected match algorithm is not implemented yet');
+    const matches = await fetchMatches();
+    const players = await fetchPlayers();
+
+    const playerWeights = Object.fromEntries(
+        players.map((player: Player) => [player.id, 0])
+    );
+    
+    for (const match of matches) {
+        const expectedValue = 4 / match.activePlayers.length;
+
+        for (const playerId of match.activePlayers) {
+            playerWeights[playerId] += expectedValue;
+
+            if (match.team1.includes(playerId) || match.team2.includes(playerId)) {
+                playerWeights[playerId] -= 1;
+            }
+        }
+    }
+
+    const minWeight = Math.min(...Object.values(playerWeights));
+    const normalizedWeights = Object.fromEntries(
+        Object.entries(playerWeights).map(([playerId, weight]) => [
+            playerId,
+            weight - minWeight + 1,
+        ])
+    );
+
+    // log player weights and player names
+    for (const player of players) {
+        console.log(`Player: ${player.name}, Weight: ${normalizedWeights[player.id]}`);
+    }
+
+    const activePlayers = players.filter((player: Player) => player.active).map((player: Player) => player.id);
+    const weightedActivePlayers = activePlayers.map((playerId) => ({
+        value: playerId,
+        weight: normalizedWeights[playerId],
+    }));
+    
+    // weighted shuffle
+    weightedShuffle(weightedActivePlayers);
+
+    const selected = weightedActivePlayers.slice(0, 4).map((player) => player.value);
+    shuffle(selected);
+
+    return new Match(selected.slice(0, 2), selected.slice(2, 4), activePlayers);
 }
 
 const MATCH_ALGORITHM_HANDLERS: Record<MatchAlgorithm, () => Promise<Match>> = {
@@ -69,4 +113,20 @@ function shuffle<T>(array: T[]): T[] {
             array[randomIndex], array[currentIndex]];
     }
     return array;
+}
+
+function weightedShuffle(arr: { value: unknown, weight: number }[]) {
+    for (let i = 0; i < arr.length; i++) {
+        const v = weightedIndexChoice(arr.slice(i));
+        [arr[i + v], arr[i]] = [arr[i], arr[i + v]];
+    }
+}
+
+function weightedIndexChoice(arr: { value: unknown, weight: number }[]): number {
+    const totalWeight = arr.map(v => v.weight).reduce((x, y) => x + y);
+    const val = Math.random() * totalWeight;
+    for (let i = 0, cur = 0; ; i++) {
+        cur += arr[i].weight;
+        if (val <= cur) return i;
+    }
 }

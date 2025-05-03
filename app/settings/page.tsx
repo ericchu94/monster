@@ -1,21 +1,27 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQuery
 import { clearPlayers } from '@/services/playerService';
 import { clearMatches } from '@/services/matchService';
-import { updateMatchAlgorithm } from '@/services/matchAlgorithmService'; // Import the new service
-import { MatchAlgorithm } from '@/models/matchAlgorithm'; // Import the enum
+import { updateMatchAlgorithm, fetchMatchAlgorithm } from '@/services/matchAlgorithmService'; // Import fetchMatchAlgorithm
+import { MatchAlgorithm } from '@/models/matchAlgorithm';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
 export default function Settings() {
     const queryClient = useQueryClient();
+
+    const { data: currentAlgorithm = MatchAlgorithm.Random } = useQuery({
+        queryKey: ['matchAlgorithm'], // Query key
+        queryFn: fetchMatchAlgorithm, // Fetch the current algorithm
+    });
+
     const matchAlgorithmMutation = useMutation({
-        mutationFn: updateMatchAlgorithm, // Use the service function
+        mutationFn: updateMatchAlgorithm,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['matchAlgorithm'], // Invalidate query
+                queryKey: ['matchAlgorithm'],
             });
         },
     });
@@ -25,7 +31,7 @@ export default function Settings() {
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ['players'],
-            }); // Refetch matches
+            });
         },
     });
 
@@ -34,7 +40,7 @@ export default function Settings() {
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ['matches'],
-            }); // Refetch matches
+            });
         },
     });
 
@@ -44,8 +50,8 @@ export default function Settings() {
                 <div className="flex items-baseline mb-4">
                     <Label htmlFor="match-algorithm" className="m-2">Match Algorithm</Label>
                     <Select
-                        value={matchAlgorithmMutation.variables || MatchAlgorithm.Random} // Use the enum
-                        onValueChange={(value) => matchAlgorithmMutation.mutate(value as MatchAlgorithm)} // Cast to enum
+                        value={currentAlgorithm} // Use the fetched algorithm
+                        onValueChange={(value) => matchAlgorithmMutation.mutate(value as MatchAlgorithm)}
                     >
                         <SelectTrigger id="match-algorithm" className="w-[180px]">
                             <SelectValue placeholder="Select an algorithm" />
@@ -55,7 +61,7 @@ export default function Settings() {
                                 <SelectItem key={algorithm} value={algorithm}>
                                     {algorithm}
                                 </SelectItem>
-                            ))} {/* Dynamically generate items */}
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
