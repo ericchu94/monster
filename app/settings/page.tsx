@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { clearPlayers } from '@/services/playerService';
 import { clearMatches } from '@/services/matchService';
 import { updateMatchAlgorithm } from '@/services/matchAlgorithmService'; // Import the new service
+import { MatchAlgorithm } from '@/models/matchAlgorithm'; // Import the enum
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -43,15 +44,18 @@ export default function Settings() {
                 <div className="flex items-baseline mb-4">
                     <Label htmlFor="match-algorithm" className="m-2">Match Algorithm</Label>
                     <Select
-                        value={matchAlgorithmMutation.variables || 'Random'}
-                        onValueChange={(value) => matchAlgorithmMutation.mutate(value)}
+                        value={matchAlgorithmMutation.variables || MatchAlgorithm.Random} // Use the enum
+                        onValueChange={(value) => matchAlgorithmMutation.mutate(value as MatchAlgorithm)} // Cast to enum
                     >
                         <SelectTrigger id="match-algorithm" className="w-[180px]">
                             <SelectValue placeholder="Select an algorithm" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Random">Random</SelectItem>
-                            <SelectItem value="Expectation">Expectation</SelectItem>
+                            {Object.values(MatchAlgorithm).map((algorithm) => (
+                                <SelectItem key={algorithm} value={algorithm}>
+                                    {algorithm}
+                                </SelectItem>
+                            ))} {/* Dynamically generate items */}
                         </SelectContent>
                     </Select>
                 </div>

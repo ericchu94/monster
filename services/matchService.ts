@@ -1,7 +1,8 @@
 import { Player } from '@/models/player';
-import { v4 as uuidv4 } from 'uuid';
 import { fetchPlayers } from '@/services/playerService';
-import { Match, MatchResult } from '@/models/match';
+import { Match } from '@/models/match';
+import { fetchMatchAlgorithm } from '@/services/matchAlgorithmService';
+import { MatchAlgorithm } from '@/models/matchAlgorithm'; // Import the enum
 
 export async function fetchMatches(): Promise<Match[]> {
     const storedMatches = localStorage.getItem('matches');
@@ -13,31 +14,32 @@ export async function saveMatches(matches: Match[]): Promise<Match[]> {
     return matches;
 }
 
-export async function generateMatch(): Promise<Match[]> {
-    const matches = await fetchMatches();
-
+async function randomMatch(): Promise<Match> {
     const players = await fetchPlayers();
     const playerIds = players.filter((player: Player) => player.active).map((player: Player) => player.id);
 
     if (playerIds.length < 4) {
-        return matches;
+        throw new Error('Not enough active players to create a match');
     }
 
-    // Shuffle players
     shuffle(playerIds);
 
-    const team1 = playerIds.slice(0, 2);
-    const team2 = playerIds.slice(2, 4);
+    return new Match(playerIds.slice(0, 2), playerIds.slice(2, 4));
+}
 
-    const match: Match = {
-        id: uuidv4(),
-        team1,
-        team2,
-        result: MatchResult.NotPlayed,
-        createdAt: new Date().toISOString(),
-    };
+export async function generateMatch(): Promise<Match[]> {
+    const algorithm = await fetchMatchAlgorithm(); // Read the algorithm from matchAlgorithmService
+
+    let match: Match;
+
+    if (algorithm === MatchAlgorithm.Random) { // Use the enum
+        match = await randomMatch();
+    } else {
+        throw new Error(`Unknown algorithm: ${algorithm}`);
+    }
+
+    const matches = await fetchMatches();
     matches.push(match);
-
     return await saveMatches(matches);
 }
 
