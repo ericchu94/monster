@@ -13,12 +13,14 @@ export class Match {
     team2: string[];
     result: MatchResult;
     createdAt: string;
+    activePlayers: string[];
 
-    constructor(team1: string[], team2: string[]) {
+    constructor(team1: string[], team2: string[], activePlayers: string[]) {
         this.id = uuidv4();
         this.team1 = team1;
         this.team2 = team2;
         this.result = MatchResult.NotPlayed;
         this.createdAt = new Date().toISOString();
+        this.activePlayers = activePlayers;
     }
 }

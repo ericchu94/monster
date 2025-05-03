@@ -16,15 +16,15 @@ export async function saveMatches(matches: Match[]): Promise<Match[]> {
 
 async function randomMatch(): Promise<Match> {
     const players = await fetchPlayers();
-    const playerIds = players.filter((player: Player) => player.active).map((player: Player) => player.id);
+    const activePlayers = players.filter((player: Player) => player.active).map((player: Player) => player.id);
 
-    if (playerIds.length < 4) {
+    if (activePlayers.length < 4) {
         throw new Error('Not enough active players to create a match');
     }
 
-    shuffle(playerIds);
+    shuffle(activePlayers);
 
-    return new Match(playerIds.slice(0, 2), playerIds.slice(2, 4));
+    return new Match(activePlayers.slice(0, 2), activePlayers.slice(2, 4), activePlayers);
 }
 
 async function expectedMatch(): Promise<Match> {
