@@ -27,17 +27,24 @@ async function randomMatch(): Promise<Match> {
     return new Match(playerIds.slice(0, 2), playerIds.slice(2, 4));
 }
 
+async function expectedMatch(): Promise<Match> {
+    throw new Error('NotImplementedError: Expected match algorithm is not implemented yet');
+}
+
+const MATCH_ALGORITHM_HANDLERS: Record<MatchAlgorithm, () => Promise<Match>> = {
+    [MatchAlgorithm.Random]: randomMatch,
+    [MatchAlgorithm.Expected]: expectedMatch,
+};
+
 export async function generateMatch(): Promise<Match[]> {
     const algorithm = await fetchMatchAlgorithm(); // Read the algorithm from matchAlgorithmService
 
-    let match: Match;
-
-    if (algorithm === MatchAlgorithm.Random) { // Use the enum
-        match = await randomMatch();
-    } else {
+    const handler = MATCH_ALGORITHM_HANDLERS[algorithm];
+    if (!handler) {
         throw new Error(`Unknown algorithm: ${algorithm}`);
     }
 
+    const match = await handler();
     const matches = await fetchMatches();
     matches.push(match);
     return await saveMatches(matches);
