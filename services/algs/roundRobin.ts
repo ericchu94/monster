@@ -13,6 +13,10 @@ function getMatchKey(matchUp: string[]): string {
     return key;
 }
 
+function cmp(a: number, b: number): number {
+    return a - b;
+}
+
 export async function roundRobin(): Promise<Match> {
     const matches = await fetchMatches();
     const matchesDict: Record<string, number> = {};
@@ -25,6 +29,14 @@ export async function roundRobin(): Promise<Match> {
         matchesDict[key] += 1;
     }
 
+    // smaller is better
+    function getScore(matchUp: string[]): number[] {
+        const key = getMatchKey(matchUp);
+        const playCount = matchesDict[key] || 0;
+
+        return [playCount];
+    }
+
     const players = await fetchPlayers();
     const activePlayers = players.filter((player: Player) => player.active).map((player: Player) => player.id);
 
@@ -32,11 +44,15 @@ export async function roundRobin(): Promise<Match> {
     shuffle(allMatcHUps);
     
     allMatcHUps.sort((a, b) => {
-        const keyA = getMatchKey(a);
-        const keyB = getMatchKey(b);
-        const countA = matchesDict[keyA] || 0;
-        const countB = matchesDict[keyB] || 0;
-        return countA - countB;
+        const scoreA = getScore(a);
+        const scoreB = getScore(b);
+
+        for (let i = 0; i < scoreA.length; i++) {
+            if (scoreA[i] !== scoreB[i]) {
+                return cmp(scoreA[i], scoreB[i]);
+            }
+        }
+        return 0;
     });
 
     const team1 = allMatcHUps[0].slice(0, 2);
