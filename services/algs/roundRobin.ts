@@ -1,4 +1,4 @@
-import { Match } from "@/models/match";
+import { Match, MatchResult } from "@/models/match";
 import { fetchMatches } from "../matchService";
 import { getAllMatchUps, shuffle } from "./utils";
 import { Player } from "@/models/player";
@@ -20,7 +20,7 @@ function cmp(a: number, b: number): number {
 export async function roundRobin(): Promise<Match> {
     const matches = await fetchMatches();
     const matchesDict: Record<string, number> = {};
-    for (const match of matches) {
+    for (const match of matches.filter((match: Match) => match.result !== MatchResult.NotPlayed)) {
         const key = getMatchKey(match.team1.concat(match.team2));
 
         if (!matchesDict[key]) {

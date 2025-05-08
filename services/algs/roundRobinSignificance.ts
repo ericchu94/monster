@@ -1,4 +1,4 @@
-import { Match } from "@/models/match";
+import { Match, MatchResult } from "@/models/match";
 import { fetchMatches } from "../matchService";
 import { getAllMatchUps, shuffle } from "./utils";
 import { Player } from "@/models/player";
@@ -22,7 +22,7 @@ export async function roundRobinSignificance(): Promise<Match> {
     const matchesDict: Record<string, number> = {};
     const teamDict: Record<string, number> = {};
     const skippedCount: Record<string, number> = {};
-    for (const match of matches) {
+    for (const match of matches.filter((match: Match) => match.result !== MatchResult.NotPlayed)) {
         // number of times this match up has been played
         const key = getMatchKey(match.team1.concat(match.team2));
 
