@@ -1,5 +1,5 @@
 {
     "name": "Monster",
     "scope": "/",
-    "display": "standalone"
+    "display": "fullscreen"
 }
