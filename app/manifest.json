@@ -1,7 +1,5 @@
 {
     "name": "Monster",
     "scope": "/",
-    "display": "fullscreen",
-    "background_color": "#000000",
-    "theme_color": "#000000"
+    "display": "fullscreen"
 }
