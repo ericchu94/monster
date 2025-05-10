@@ -2,10 +2,10 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Play, Swords } from 'lucide-react';
+import { Play, Swords, ArrowDownToLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
 import { Player } from '@/models/player';
 import { fetchPlayers } from '@/services/playerService'; // Import a service to fetch player details
@@ -69,6 +69,12 @@ export default function Matches() {
     });
 
     const lastMatchRef = useRef<HTMLDivElement | null>(null);
+    const [scrolledToBottom, setScrolledToBottom] = useState(false);
+
+    const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+        const target = event.target as HTMLDivElement;
+        setScrolledToBottom(Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) <= 3.0);
+    };
 
     useEffect(() => {
         if (lastMatchRef.current) {
@@ -102,10 +108,28 @@ export default function Matches() {
                 </Button></div>);
     }
 
+    const bottomButton = scrolledToBottom ? (
+        <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent text-input" onClick={() => {
+            generateMatchMutation.mutate();
+        }}>
+            Skip
+        </Button>) : (
+        <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={
+            () => {
+                lastMatchRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }>
+            <ArrowDownToLine />
+        </Button>
+    );
+
     return (
         <>
             <div className="flex flex-col w-full h-full">
-                <div className="grow overflow-auto snap-y snap-mandatory basis-0">
+                <div
+                    className="grow overflow-auto snap-y snap-mandatory basis-0"
+                    onScroll={handleScroll}
+                >
                     {matches!.map((match: Match, index: number) => (
                         <MatchComponent
                             key={match.id}
@@ -115,11 +139,7 @@ export default function Matches() {
                         />
                     ))}
                 </div>
-                <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent text-input" onClick={() => {
-                    generateMatchMutation.mutate();
-                }}>
-                    Skip
-                </Button>
+                {bottomButton}
             </div>
         </>
     );
