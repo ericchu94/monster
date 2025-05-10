@@ -22,6 +22,7 @@ export function EditPlayerDialog({
     mode?: "edit" | "create"
 }) {
     const [open, setOpen] = useState(false);
+    const [name, setName] = useState(player.name);
 
     const button = mode === "edit" ? (
         <Button variant="outline" className="h-16 w-16 my-2 rounded-l-none cursor-pointer border-l-0">
@@ -40,11 +41,16 @@ export function EditPlayerDialog({
         const formData = new FormData(event.target as HTMLFormElement);
         const name = formData.get("name") as string;
         if (onPlayerChange) {
-            console.log("onPlayerChange", player, name, { ...player, name });
             onPlayerChange({ ...player, name });
         }
-        setOpen(false);
+        if (mode === "edit") {
+            setOpen(false);
+        } else {
+            setName("");
+        }
     };
+
+    const buttonText = mode === "edit" ? "Save" : "Add";
 
     return <>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -57,12 +63,13 @@ export function EditPlayerDialog({
                     <Input
                         type="text"
                         name="name"
-                        defaultValue={player.name}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         placeholder="Name"
                         className="mb-4"
                     />
                     <DialogFooter>
-                        <Button type="submit">Save</Button>
+                        <Button type="submit">{buttonText}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
