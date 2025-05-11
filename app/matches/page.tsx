@@ -109,10 +109,12 @@ export default function Matches() {
     }
 
     const bottomButton = scrolledToBottom ? (
-        <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent text-input" onClick={() => {
+        <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={() => {
             generateMatchMutation.mutate();
         }}>
-            Skip
+            <span className='text-input'>
+                Skip
+            </span>
         </Button>) : (
         <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={
             () => {
