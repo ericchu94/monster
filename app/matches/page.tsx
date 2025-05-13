@@ -2,7 +2,7 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Play, Swords, ArrowDownToLine } from 'lucide-react';
+import { Play, Swords, ChevronsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect, useState } from 'react';
@@ -121,7 +121,7 @@ export default function Matches() {
                 lastMatchRef.current?.scrollIntoView({ behavior: 'smooth' });
             }
         }>
-            <ArrowDownToLine />
+            <ChevronsDown />
         </Button>
     );
 
