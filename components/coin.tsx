@@ -7,24 +7,39 @@ export function Coin() {
     const heads = <Swords size={size} />;
     const tails = <Pentagon size={size} />;
 
+    const [prev, setPrev] = useState(true);
     const [isHeads, setIsHeads] = useState(true);
     const [animate, setAnimate] = useState(false);
 
     const onClick = () => {
         const randomValue = Math.random();
+        setPrev(isHeads);
         setIsHeads(randomValue < 0.5);
         setAnimate(true);
         setTimeout(() => {
             setAnimate(false);
         }
-        , 1000);
+            , 1000);
     };
 
-    const animateBase = 'transition-transform duration-1000 animate-'
-    const animateClass = animate ? `${animateBase}${isHeads ? 'heads' : 'tails'}` : '';
+    let animateClass;
+
+    if (prev) {
+        if (isHeads) {
+            animateClass = 'animate-heads-to-heads';
+        } else {
+            animateClass = 'animate-heads-to-tails';
+        }
+    } else {
+        if (isHeads) {
+            animateClass = 'animate-tails-to-heads';
+        } else {
+            animateClass = 'animate-tails-to-tails';
+        }
+    }
 
     return (
-        <div onClick={onClick} className={`relative cursor-pointer transform-3d ${isHeads ? 'rotate-y-0' : 'rotate-y-180'} ${animateClass}`}>
+        <div onClick={onClick} className={`relative cursor-pointer transform-3d transition-transform duration-1000 ${isHeads ? 'rotate-y-0' : 'rotate-y-180'} ${animate ? animateClass : ''}`}>
             <div className="bg-background absolute backface-hidden">
                 {heads}
             </div>

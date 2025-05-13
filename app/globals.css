@@ -122,17 +122,43 @@
 }
 
 @theme {
-  --animate-heads: heads 1s ease-out forwards;
-  --animate-tails: tails 1s ease-out forwards;
+  --animate-heads-to-heads: heads-to-heads 1s ease-out forwards;
+  --animate-heads-to-tails: heads-to-tails 1s ease-out forwards;
+  --animate-tails-to-heads: tails-to-heads 1s ease-out forwards;
+  --animate-tails-to-tails: tails-to-tails 1s ease-out forwards;
 
-  @keyframes heads {
-    100% {
+  @keyframes heads-to-heads {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
       transform: rotateY(720deg);
     }
   }
 
-  @keyframes tails {
-    100% {
+  @keyframes heads-to-tails {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(900deg);
+    }
+  }
+
+  @keyframes tails-to-heads {
+    from {
+      transform: rotateY(180deg);
+    }
+    to {
+      transform: rotateY(720deg);
+    }
+  }
+
+  @keyframes tails-to-tails {
+    from {
+      transform: rotateY(180deg);
+    }
+    to {
       transform: rotateY(900deg);
     }
   }
