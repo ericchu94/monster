@@ -2,13 +2,14 @@
 
 import { Match, MatchResult } from '@/models/match'; // Import Match and MatchResult
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Play, Swords, ChevronsDown } from 'lucide-react';
+import { Play, ChevronsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect, useState } from 'react';
 import { fetchMatches, saveMatches, generateMatch } from '@/services/matchService'; // Import from matchService
 import { Player } from '@/models/player';
 import { fetchPlayers } from '@/services/playerService'; // Import a service to fetch player details
+import { Coin } from '@/components/coin';
 
 function TeamComponent({ team, winner, onPressedChange }: { team: string[], winner: boolean, onPressedChange: (pressed: boolean) => void }) {
     const { data: players } = useQuery({
@@ -34,7 +35,7 @@ function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchCh
                 match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
                 onMatchChange(match);
             }} />
-            <Swords />
+            <Coin />
             <TeamComponent team={match.team2} winner={match.result == MatchResult.Team2Win} onPressedChange={(pressed) => {
                 match.result = pressed ? MatchResult.Team2Win : MatchResult.NotPlayed;
                 onMatchChange(match);
