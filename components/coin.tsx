@@ -39,7 +39,7 @@ export function Coin() {
     }
 
     return (
-        <div onClick={onClick} className={`relative cursor-pointer transform-3d transition-transform duration-1000 ${isHeads ? 'rotate-y-0' : 'rotate-y-180'} ${animate ? animateClass : ''}`}>
+        <div onClick={onClick} className={`relative cursor-pointer transform-3d ${isHeads ? 'rotate-y-0' : 'rotate-y-180'} ${animate ? 'transition-transform duration-1000 ' + animateClass : ''}`}>
             <div className="bg-background absolute backface-hidden">
                 {heads}
             </div>
