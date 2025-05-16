@@ -698,6 +698,45 @@ function SidebarMenuSubButton({
   )
 }
 
+/**
+ * SidebarPlayerRankingLink - A component for adding a player ranking link to the sidebar
+ * 
+ * @example
+ * ```tsx
+ * <SidebarMenu>
+ *   <SidebarMenuItem>
+ *     <SidebarPlayerRankingLink href="/rankings" />
+ *   </SidebarMenuItem>
+ * </SidebarMenu>
+ * ```
+ */
+function SidebarPlayerRankingLink({
+  href = "/rankings",
+  icon,
+  isActive = false,
+  className,
+  children = "Player Rankings",
+  ...props
+}: React.ComponentProps<typeof SidebarMenuButton> & {
+  href: string
+  icon?: React.ReactNode
+}) {
+  return (
+    <SidebarMenuButton
+      asChild
+      isActive={isActive}
+      tooltip="Player Rankings"
+      className={className}
+      {...props}
+    >
+      <a href={href}>
+        {icon}
+        <span>{children}</span>
+      </a>
+    </SidebarMenuButton>
+  )
+}
+
 export {
   Sidebar,
   SidebarContent,
@@ -718,6 +757,7 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarPlayerRankingLink,
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
