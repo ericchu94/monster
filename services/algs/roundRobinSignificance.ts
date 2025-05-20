@@ -22,6 +22,8 @@ export async function roundRobinSignificance(): Promise<Match> {
     const matchesDict: Record<string, number> = {};
     const teamDict: Record<string, number> = {};
     const skippedCount: Record<string, number> = {};
+    const expectedMatches: Record<string, number> = {};
+    const actualMatches: Record<string, number> = {};
     for (const match of matches.filter((match: Match) => match.result !== MatchResult.NotPlayed)) {
         // number of times this match up has been played
         const key = getMatchKey(match.team1.concat(match.team2));
@@ -54,6 +56,21 @@ export async function roundRobinSignificance(): Promise<Match> {
                 skippedCount[player] += 1;
             }
         }
+
+        // expected and actual matches
+        for (const player of match.activePlayers) {
+            if (!expectedMatches[player]) {
+                expectedMatches[player] = 0;
+            }
+            expectedMatches[player] += 4 / match.activePlayers.length;
+
+            if (!actualMatches[player]) {
+                actualMatches[player] = 0;
+            }
+            if (match.team1.includes(player) || match.team2.includes(player)) {
+                actualMatches[player] += 1;
+            }
+        }
     }
 
     // smaller is better
@@ -65,7 +82,10 @@ export async function roundRobinSignificance(): Promise<Match> {
 
         const skippedCountSum = matchUp.reduce((sum, player) => sum + (skippedCount[player] || 0), 0);
 
-        return [playCount, team1Count + teamCount2, -skippedCountSum];
+        const expectedMatchesSum = matchUp.reduce((sum, player) => sum + (expectedMatches[player] || 0), 0);
+        const actualMatchesSum = matchUp.reduce((sum, player) => sum + (actualMatches[player] || 0), 0);
+
+        return [playCount, team1Count + teamCount2, -skippedCountSum, actualMatchesSum - expectedMatchesSum];
     }
 
     const players = await fetchPlayers();
@@ -88,6 +108,7 @@ export async function roundRobinSignificance(): Promise<Match> {
 
     const team1 = allMatcHUps[0].slice(0, 2);
     const team2 = allMatcHUps[0].slice(2, 4);
+    const teams = shuffle([team1, team2]);
 
-    return new Match(team1, team2, activePlayers);
+    return new Match(teams[0], teams[1], activePlayers);
 }

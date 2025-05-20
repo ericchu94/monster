@@ -37,7 +37,7 @@ export function getAllMatchUps<T>(items: T[]): T[][] {
 
     for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
-            for (let k = 0; k < n; k++) {
+            for (let k = i + 1; k < n; k++) {
                 for (let l = k + 1; l < n; l++) {
                     if (i !== j && i !== k && i !== l && j !== k && j !== l && k !== l) {
                         matchUps.push([items[i], items[j], items[k], items[l]]);
