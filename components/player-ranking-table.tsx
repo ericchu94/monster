@@ -62,10 +62,7 @@ export function PlayerRankingTable() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Player Rankings</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         <Table>
           <TableHeader>
             <TableRow>
