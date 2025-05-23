@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { RankBadge } from "@/components/rank-badge";
 
 export function PlayerRankingTable() {
@@ -62,10 +62,7 @@ export function PlayerRankingTable() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Player Rankings</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         <Table>
           <TableHeader>
             <TableRow>
