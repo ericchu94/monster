@@ -70,7 +70,7 @@ export default function Matches() {
     });
 
     const lastMatchRef = useRef<HTMLDivElement | null>(null);
-    const [scrolledToBottom, setScrolledToBottom] = useState(false);
+    const [scrolledToBottom, setScrolledToBottom] = useState(true);
 
     const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
         const target = event.target as HTMLDivElement;
