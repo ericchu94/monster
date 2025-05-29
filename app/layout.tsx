@@ -33,6 +33,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
+        <title>Monster by Eric Chu</title>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
