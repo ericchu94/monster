@@ -56,11 +56,13 @@ export async function calculateRankings(): Promise<PlayerRanking[]> {
         if (ranking.matchesPlayed > 0) {
             ranking.winRate = ranking.wins / ranking.matchesPlayed;
         }
-        // Score is now just wins * 3 (no draws)
-        ranking.score = ranking.wins * 3;
+        // Score is now just wins * 2 (no draws)
+        ranking.score = ranking.wins * 2;
     });
-    // Convert to array and sort by score (descending)
-    return Object.values(rankings).sort((a, b) => b.score - a.score);
+    // Convert to array, filter out players with 0 matches, and sort by score (descending)
+    return Object.values(rankings)
+        .filter(ranking => ranking.matchesPlayed > 0)
+        .sort((a, b) => b.score - a.score);
 }
 
 // Save rankings to localStorage
