@@ -71,7 +71,6 @@ export function PlayerRankingTable() {
               <TableHead className="text-right">Matches</TableHead>
               <TableHead className="text-right">W</TableHead>
               <TableHead className="text-right">L</TableHead>
-              <TableHead className="text-right">D</TableHead>
               <TableHead className="text-right">Win Rate</TableHead>
               <TableHead className="text-right">Score</TableHead>
             </TableRow>
@@ -86,7 +85,6 @@ export function PlayerRankingTable() {
                 <TableCell className="text-right">{ranking.matchesPlayed}</TableCell>
                 <TableCell className="text-right">{ranking.wins}</TableCell>
                 <TableCell className="text-right">{ranking.losses}</TableCell>
-                <TableCell className="text-right">{ranking.draws}</TableCell>
                 <TableCell className="text-right">{formatWinRate(ranking.winRate)}</TableCell>
                 <TableCell className="text-right font-bold">{ranking.score}</TableCell>
               </TableRow>

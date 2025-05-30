@@ -1,7 +1,7 @@
 import { Match, MatchResult } from '@/models/match';
 import { fetchMatches } from './matchService';
 import { fetchPlayers } from './playerService';
-import { calculateScore, PlayerRanking } from '@/models/playerRanking';
+import { PlayerRanking } from '@/models/playerRanking';
 
 // Calculate rankings for all players based on match history
 export async function calculateRankings(): Promise<PlayerRanking[]> {
@@ -16,7 +16,6 @@ export async function calculateRankings(): Promise<PlayerRanking[]> {
             playerId: player.id,
             wins: 0,
             losses: 0,
-            draws: 0,
             matchesPlayed: 0,
             winRate: 0,
             score: 0
@@ -29,47 +28,37 @@ export async function calculateRankings(): Promise<PlayerRanking[]> {
         if (match.result === MatchResult.NotPlayed) {
             return;
         }
-        
         // Update stats for team 1 players
         match.team1.forEach(playerId => {
             if (rankings[playerId]) {
                 rankings[playerId].matchesPlayed++;
-                
                 if (match.result === MatchResult.Team1Win) {
                     rankings[playerId].wins++;
                 } else if (match.result === MatchResult.Team2Win) {
                     rankings[playerId].losses++;
-                } else if (match.result === MatchResult.Draw) {
-                    rankings[playerId].draws++;
                 }
             }
         });
-        
         // Update stats for team 2 players
         match.team2.forEach(playerId => {
             if (rankings[playerId]) {
                 rankings[playerId].matchesPlayed++;
-                
                 if (match.result === MatchResult.Team2Win) {
                     rankings[playerId].wins++;
                 } else if (match.result === MatchResult.Team1Win) {
                     rankings[playerId].losses++;
-                } else if (match.result === MatchResult.Draw) {
-                    rankings[playerId].draws++;
                 }
             }
         });
     });
-    
     // Calculate win rates and scores for all players
     Object.values(rankings).forEach(ranking => {
         if (ranking.matchesPlayed > 0) {
             ranking.winRate = ranking.wins / ranking.matchesPlayed;
         }
-        
-        ranking.score = calculateScore(ranking.wins, ranking.losses, ranking.draws);
+        // Score is now just wins * 3 (no draws)
+        ranking.score = ranking.wins * 3;
     });
-    
     // Convert to array and sort by score (descending)
     return Object.values(rankings).sort((a, b) => b.score - a.score);
 }

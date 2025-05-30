@@ -4,7 +4,6 @@ export enum MatchResult {
     NotPlayed = 'NotPlayed', // Default state for matches not played
     Team1Win = 'Team1Win',
     Team2Win = 'Team2Win',
-    Draw = 'Draw',
 }
 
 export class Match {
