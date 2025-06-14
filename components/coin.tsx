@@ -1,9 +1,7 @@
 import { Pentagon, Swords } from "lucide-react";
 import { useState } from "react";
 
-export function Coin() {
-    const size = 64;
-
+export function Coin({ size = 64 }: { size?: number }) {
     const heads = <Swords size={size} />;
     const tails = <Pentagon size={size} />;
 
