@@ -3,4 +3,5 @@ export enum MatchAlgorithm {
     Expected = "expected",
     RoundRobin = "roundRobin",
     RoundRobinSignificance = "RoundRobinSignificance",
+    RestingQueue = "RestingQueue",
 }

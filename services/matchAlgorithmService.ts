@@ -7,6 +7,6 @@ export function updateMatchAlgorithm(newAlgorithm: MatchAlgorithm): Promise<Matc
 
 export function fetchMatchAlgorithm(): Promise<MatchAlgorithm> {
     return Promise.resolve(
-        (localStorage.getItem('matchAlgorithm') as MatchAlgorithm) || MatchAlgorithm.RoundRobinSignificance // Default to enum value
+        (localStorage.getItem('matchAlgorithm') as MatchAlgorithm) || MatchAlgorithm.RestingQueue // Default to enum value
     );
 }
