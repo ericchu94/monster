@@ -20,13 +20,20 @@ function TeamComponent({ team, winner, onPressedChange }: { team: string[], winn
         queryFn: fetchPlayers,
     });
 
+    // Filter out empty strings (dummy players) and get player objects
     const teamPlayers = players?.filter((player: Player) => team.includes(player.id)) || [];
+    
+    // Check if this team has a dummy player (empty string in the team array)
+    const hasDummyPlayer = team.includes('');
 
     return (
         <Toggle pressed={winner} variant="outline" className="self-stretch basis-0 h-auto grow flex flex-col items-center justify-center cursor-pointer border rounded-md m-2 p-2 bg-input/20" onPressedChange={onPressedChange}>
             {teamPlayers.map(player => (
                 <div key={player.id} className='text-4xl'>{player.name}</div>
             ))}
+            {hasDummyPlayer && (
+                <div className='text-4xl text-gray-400 italic'>Empty Slot</div>
+            )}
         </Toggle>
     );
 }
@@ -55,19 +62,17 @@ function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchCh
     );
 }
 
-function TableMatches({ tableId, tableName, matches, onMatchChange }: { tableId: string, tableName: string, matches: Match[], onMatchChange: (match: Match) => void, isPrimaryTable: boolean }) {
+function TableMatches({ tableId, tableName, matches, onMatchChange, generateMatchMutation }: { 
+    tableId: string, 
+    tableName: string, 
+    matches: Match[], 
+    onMatchChange: (match: Match) => void, 
+    isPrimaryTable: boolean,
+    generateMatchMutation: any
+}) {
     const lastMatchRef = useRef<HTMLDivElement | null>(null);
     const queryClient = useQueryClient();
     const [scrolledToBottom, setScrolledToBottom] = useState(true);
-
-    const generateMatchMutation = useMutation({
-        mutationFn: (tableId: string) => generateMatch(tableId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['matches'],
-            });
-        },
-    });
 
     const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
         const target = event.target as HTMLDivElement;
@@ -99,16 +104,7 @@ function TableMatches({ tableId, tableName, matches, onMatchChange }: { tableId:
         );
     }
 
-    const bottomButton = scrolledToBottom ? (
-        <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={() => {
-            generateMatchMutation.mutate(tableId);
-        }}>
-            <span className='text-input'>
-                Generate New Match
-            </span>
-            <Plus className="ml-2" size={16} />
-        </Button>
-    ) : (
+    const bottomButton = !scrolledToBottom ? (
         <Button variant="outline" className="m-2 cursor-pointer bg-transparent dark:bg-transparent" onClick={
             () => {
                 lastMatchRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -116,7 +112,7 @@ function TableMatches({ tableId, tableName, matches, onMatchChange }: { tableId:
         }>
             <ChevronsDown />
         </Button>
-    );
+    ) : null;
 
     return (
         <div className="flex flex-col w-full h-full">
@@ -138,15 +134,31 @@ function TableMatches({ tableId, tableName, matches, onMatchChange }: { tableId:
     );
 }
 
-function NotEnoughPlayersMessage() {
+function NotEnoughPlayersMessage({ isPrimaryTable, previousTableName }: { isPrimaryTable: boolean, previousTableName?: string }) {
     return (
         <div className='flex w-full h-full items-center justify-center flex-col'>
             <AlertCircle className="mb-4 text-amber-500" size={48} />
             <div className="text-xl mb-2">Not Enough Available Players</div>
             <div className="text-sm mb-4 text-center max-w-md">
-                This table is currently disabled because there are not enough available players.
-                <br /><br />
-                Players must finish their matches on the primary table before they can play here.
+                {isPrimaryTable ? (
+                    <>
+                        This table is currently disabled because there are not enough available players.
+                        <br /><br />
+                        Please make sure you have at least 4 active players.
+                    </>
+                ) : previousTableName ? (
+                    <>
+                        There are not enough players to fill this table after the match has finished.
+                        <br /><br />
+                        Please go back to <strong>{previousTableName}</strong> for the next match.
+                    </>
+                ) : (
+                    <>
+                        This table is currently disabled because there are not enough available players.
+                        <br /><br />
+                        Players must finish their matches on the primary table before they can play here.
+                    </>
+                )}
             </div>
         </div>
     );
@@ -174,6 +186,15 @@ export default function Matches() {
         queryFn: getPlayersCurrentlyPlaying,
     });
 
+    const generateMatchMutation = useMutation({
+        mutationFn: (tableId: string) => generateMatch(tableId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['matches'],
+            });
+        },
+    });
+
     const saveMatchesMutation = useMutation({
         mutationFn: saveMatches,
         onSuccess: () => {
@@ -190,7 +211,30 @@ export default function Matches() {
         const allMatches = matches.map(match =>
             match.id === updatedMatch.id ? updatedMatch : match
         );
-        saveMatchesMutation.mutate(allMatches);
+        
+        // Save the updated match
+        saveMatchesMutation.mutate(allMatches, {
+            onSuccess: () => {
+                // If a winner was selected (match is completed), automatically generate a new match
+                if (updatedMatch.result === MatchResult.Team1Win || updatedMatch.result === MatchResult.Team2Win) {
+                    console.log('Match completed, preparing to generate new match');
+                    
+                    // Force refetch all data to ensure we have the latest state
+                    Promise.all([
+                        queryClient.invalidateQueries({ queryKey: ['matches'] }),
+                        queryClient.invalidateQueries({ queryKey: ['players'] }),
+                        queryClient.invalidateQueries({ queryKey: ['playerTableMap'] }),
+                        queryClient.invalidateQueries({ queryKey: ['tables'] })
+                    ]).then(() => {
+                        // Use a longer timeout to ensure all queries have completed
+                        setTimeout(() => {
+                            console.log('Generating new match after winner selection');
+                            generateMatchMutation.mutate(updatedMatch.tableId);
+                        }, 300);
+                    });
+                }
+            }
+        });
     };
 
     // Calculate which tables have enough available players
@@ -201,6 +245,14 @@ export default function Matches() {
             return !assignedTable || assignedTable === tableId;
         });
         return availablePlayers.length;
+    };
+
+    // Check if a table has an active match
+    const hasActiveMatch = (tableId: string) => {
+        return matches.some(match => 
+            match.tableId === tableId && 
+            match.result === MatchResult.NotPlayed
+        );
     };
 
     if (matchesLoading || tablesLoading || playersLoading || playerTableMapLoading) return <div>Loading...</div>;
@@ -248,6 +300,7 @@ export default function Matches() {
                 matches={matches} 
                 onMatchChange={handleMatchChange}
                 isPrimaryTable={true}
+                generateMatchMutation={generateMatchMutation}
             />
         );
     }
@@ -258,17 +311,23 @@ export default function Matches() {
             <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-4">
                 {sortedTables.map((table, index) => {
                     const isPrimaryTable = index === 0;
-                    const hasEnoughPlayers = isPrimaryTable || 
-                        (primaryTableHasEnoughPlayers && getAvailablePlayerCount(table.id) >= 4);
+                    // Only disable a table if:
+                    // 1. It's not the primary table AND
+                    // 2. It doesn't have an active match AND
+                    // 3. Either the primary table doesn't have enough players OR this table doesn't have enough players
+                    const tableHasActiveMatch = hasActiveMatch(table.id);
+                    const shouldDisable = !isPrimaryTable && 
+                                         !tableHasActiveMatch && 
+                                         (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
                     
                     return (
                         <TabsTrigger 
                             key={table.id} 
                             value={table.id}
-                            className={!hasEnoughPlayers && !isPrimaryTable ? "opacity-50 pointer-events-none" : ""}
+                            className={shouldDisable ? "opacity-50 pointer-events-none" : ""}
                         >
                             {table.name}
-                            {!hasEnoughPlayers && !isPrimaryTable && " (Disabled)"}
+                            {shouldDisable && " (Disabled)"}
                         </TabsTrigger>
                     );
                 })}
@@ -276,21 +335,36 @@ export default function Matches() {
             
             {sortedTables.map((table, index) => {
                 const isPrimaryTable = index === 0;
-                const hasEnoughPlayers = isPrimaryTable || 
-                    (primaryTableHasEnoughPlayers && getAvailablePlayerCount(table.id) >= 4);
+                const tableHasActiveMatch = hasActiveMatch(table.id);
+                const shouldDisable = !isPrimaryTable && 
+                                     !tableHasActiveMatch && 
+                                     (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
+                
+                // Get the previous table name for the message
+                const previousTableName = index > 0 ? sortedTables[index - 1].name : undefined;
+                
+                // Check if this table had a match that just finished
+                const hasFinishedMatch = matches.some(match => 
+                    match.tableId === table.id && 
+                    (match.result === MatchResult.Team1Win || match.result === MatchResult.Team2Win)
+                );
                 
                 return (
                     <TabsContent key={table.id} value={table.id} className="h-[calc(100%-60px)]">
-                        {hasEnoughPlayers ? (
+                        {!shouldDisable ? (
                             <TableMatches 
                                 tableId={table.id} 
                                 tableName={table.name} 
                                 matches={matches} 
                                 onMatchChange={handleMatchChange}
                                 isPrimaryTable={isPrimaryTable}
+                                generateMatchMutation={generateMatchMutation}
                             />
                         ) : (
-                            <NotEnoughPlayersMessage />
+                            <NotEnoughPlayersMessage 
+                                isPrimaryTable={isPrimaryTable}
+                                previousTableName={hasFinishedMatch ? previousTableName : undefined}
+                            />
                         )}
                     </TabsContent>
                 );
