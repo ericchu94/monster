@@ -204,8 +204,8 @@ export async function restingQueue(): Promise<Match> {
         const recency = matchupRecencyMap[key] || -1; // -1 if never played
         const team1Key = getTeamKey(matchUp.slice(0, 2));
         const team2Key = getTeamKey(matchUp.slice(2, 4));
-        const team1Recency = teamRecencyMap[team1Key] || -1; // -1 if never played
-        const team2Recency = teamRecencyMap[team2Key] || -1; // -1 if never played
+        const team1Recency = teamRecencyMap[team1Key] ?? -1; // -1 if never played
+        const team2Recency = teamRecencyMap[team2Key] ?? -1; // -1 if never played
         const playCount = matchupPlayCount[key] || 0; // 0 if never played
 
         return [playCount, recency, team1Recency + team2Recency];
