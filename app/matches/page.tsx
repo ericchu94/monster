@@ -265,8 +265,7 @@ export default function Matches() {
                         <TabsTrigger 
                             key={table.id} 
                             value={table.id}
-                            disabled={!hasEnoughPlayers && !isPrimaryTable}
-                            className={!hasEnoughPlayers && !isPrimaryTable ? "opacity-50" : ""}
+                            className={!hasEnoughPlayers && !isPrimaryTable ? "opacity-50 pointer-events-none" : ""}
                         >
                             {table.name}
                             {!hasEnoughPlayers && !isPrimaryTable && " (Disabled)"}

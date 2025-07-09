@@ -43,7 +43,6 @@ export function EditPlayerDialog({
         <Fab 
             icon={<Plus size={24} />} 
             position="bottom-right"
-            variant="default"
             size="lg"
             aria-label="Add player"
         />
