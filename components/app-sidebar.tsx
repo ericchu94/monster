@@ -1,4 +1,4 @@
-import { Home, User, Swords, Settings, Trophy } from "lucide-react"
+import { Home, User, Swords, Settings, Trophy, History } from "lucide-react"
 
 import {
   Sidebar,
@@ -32,6 +32,11 @@ const items = [
     title: "Rankings",
     url: "/rankings",
     icon: Trophy,
+  },
+  {
+    title: "History",
+    url: "/history",
+    icon: History, // You can replace this with a more appropriate icon if desired
   },
   {
     title: "Settings",
