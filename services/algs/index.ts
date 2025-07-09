@@ -6,7 +6,7 @@ import { roundRobin } from "./roundRobin";
 import { roundRobinSignificance } from "./roundRobinSignificance";
 import { restingQueue } from "./restingQueue";
 
-export const MATCH_ALGORITHMS: Record<MatchAlgorithm, () => Promise<Match>> = {
+export const MATCH_ALGORITHMS: Record<MatchAlgorithm, (tableId: string, playerTableMap?: Record<string, string>) => Promise<Match | null>> = {
     [MatchAlgorithm.Random]: randomMatch,
     [MatchAlgorithm.Expected]: expectedMatch,
     [MatchAlgorithm.RoundRobin]: roundRobin,

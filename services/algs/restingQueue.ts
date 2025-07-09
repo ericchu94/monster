@@ -82,21 +82,31 @@ console.log(setsAreEqual(set1, set2)); // true
 console.log(setsAreEqual(set1, set3)); // false
 
 
-export async function restingQueue(): Promise<Match> {
+export async function restingQueue(tableId: string, playerTableMap: Record<string, string> = {}): Promise<Match | null> {
     const players = await fetchPlayers();
-    const activePlayers = players.filter(p => p.active).map(p => p.id);
+    
+    // Filter out players who are currently playing on other tables
+    const availablePlayers = players.filter((player) => {
+        if (!player.active) return false;
+        
+        // If player is assigned to a table and it's not this table, they're unavailable
+        const assignedTable = playerTableMap[player.id];
+        return !assignedTable || assignedTable === tableId;
+    }).map(p => p.id);
 
-    if (activePlayers.length < 4) {
-        throw new Error("Not enough active players to form a match.");
+    if (availablePlayers.length < 4) {
+        // Log warning instead of showing an alert
+        console.warn(`Not enough available players to create a match on this table. Some players may be playing on other tables.`);
+        return null;
     }
 
-    console.log("Active players:", activePlayers);
+    console.log("Available players:", availablePlayers);
 
     const matches = await fetchMatches();
     const playedMatches = matches.filter(m => m.result !== MatchResult.NotPlayed);
 
     // Chop of matches with these active players, consecutively from the end
-    const idx = playedMatches.findLastIndex(m => !setsAreEqual(new Set(m.activePlayers), new Set(activePlayers)));
+    const idx = playedMatches.findLastIndex(m => !setsAreEqual(new Set(m.activePlayers), new Set(availablePlayers)));
 
     const beforeMatches = playedMatches.slice(0, idx + 1);
 
@@ -104,7 +114,7 @@ export async function restingQueue(): Promise<Match> {
     const recencyMap: Record<string, number> = {};
     const neverPlayedMap: Record<string, number> = {};
 
-    for (const playerId of activePlayers) {
+    for (const playerId of availablePlayers) {
         deviationMap[playerId] = 0;
         recencyMap[playerId] = -1; // Initialize with -1 to indicate not seen yet
         neverPlayedMap[playerId] = 0; // Assume they have never played
@@ -138,7 +148,7 @@ export async function restingQueue(): Promise<Match> {
         return [neverPlayed, deviation, recency];
     }
 
-    activePlayers.sort((a, b) => {
+    availablePlayers.sort((a, b) => {
         const scoreA = getScore(a);
         const scoreB = getScore(b);
 
@@ -149,14 +159,14 @@ export async function restingQueue(): Promise<Match> {
         }
         return 0;
     });
-    activePlayers.reverse()
+    availablePlayers.reverse()
 
-    for (const playerId of activePlayers) {
+    for (const playerId of availablePlayers) {
         const name = players.find(p => p.id === playerId)?.name || "Unknown Player";
         console.log(`Player ${name} - Score: ${getScore(playerId).join(", ")}`);
     }
 
-    const rests = restSequence(activePlayers.length);
+    const rests = restSequence(availablePlayers.length);
 
     console.log("Rest sequences:", rests);
 
@@ -168,7 +178,7 @@ export async function restingQueue(): Promise<Match> {
 
     console.log("Next rest sequence:", nextRest);
 
-    const chosenPlayers = activePlayers.filter((_, index) => !nextRest.includes(index));
+    const chosenPlayers = availablePlayers.filter((_, index) => !nextRest.includes(index));
 
     console.log("Chosen players for the match:", chosenPlayers);
 
@@ -239,5 +249,8 @@ export async function restingQueue(): Promise<Match> {
     const team2 = shuffle(chosenMatchup.slice(2, 4));
     const teams = shuffle([team1, team2]);
 
-    return new Match(teams[0], teams[1], activePlayers);
+    // Get all active players for the activePlayers field (used for tracking expected play counts)
+    const activePlayers = players.filter((player) => player.active).map((player) => player.id);
+
+    return new Match(teams[0], teams[1], activePlayers, tableId);
 }

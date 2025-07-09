@@ -36,7 +36,7 @@ const items = [
   {
     title: "History",
     url: "/history",
-    icon: History, // You can replace this with a more appropriate icon if desired
+    icon: History,
   },
   {
     title: "Settings",

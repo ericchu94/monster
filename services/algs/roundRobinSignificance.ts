@@ -17,7 +17,7 @@ function cmp(a: number, b: number): number {
     return a - b;
 }
 
-export async function roundRobinSignificance(): Promise<Match> {
+export async function roundRobinSignificance(tableId: string, playerTableMap: Record<string, string> = {}): Promise<Match | null> {
     const matches = await fetchMatches();
     const matchesDict: Record<string, number> = {};
     const teamDict: Record<string, number> = {};
@@ -89,12 +89,26 @@ export async function roundRobinSignificance(): Promise<Match> {
     }
 
     const players = await fetchPlayers();
-    const activePlayers = players.filter((player: Player) => player.active).map((player: Player) => player.id);
-
-    const allMatcHUps = getAllMatchUps(activePlayers);
-    shuffle(allMatcHUps);
     
-    allMatcHUps.sort((a, b) => {
+    // Filter out players who are currently playing on other tables
+    const availablePlayers = players.filter((player: Player) => {
+        if (!player.active) return false;
+        
+        // If player is assigned to a table and it's not this table, they're unavailable
+        const assignedTable = playerTableMap[player.id];
+        return !assignedTable || assignedTable === tableId;
+    }).map((player: Player) => player.id);
+
+    if (availablePlayers.length < 4) {
+        // Log warning instead of showing an alert
+        console.warn(`Not enough available players to create a match on this table. Some players may be playing on other tables.`);
+        return null;
+    }
+
+    const allMatchUps = getAllMatchUps(availablePlayers);
+    shuffle(allMatchUps);
+    
+    allMatchUps.sort((a, b) => {
         const scoreA = getScore(a);
         const scoreB = getScore(b);
 
@@ -106,9 +120,12 @@ export async function roundRobinSignificance(): Promise<Match> {
         return 0;
     });
 
-    const team1 = allMatcHUps[0].slice(0, 2);
-    const team2 = allMatcHUps[0].slice(2, 4);
+    const team1 = allMatchUps[0].slice(0, 2);
+    const team2 = allMatchUps[0].slice(2, 4);
     const teams = shuffle([team1, team2]);
 
-    return new Match(teams[0], teams[1], activePlayers);
+    // Get all active players for the activePlayers field (used for tracking expected play counts)
+    const activePlayers = players.filter((player: Player) => player.active).map((player: Player) => player.id);
+
+    return new Match(teams[0], teams[1], activePlayers, tableId);
 }
