@@ -2,7 +2,7 @@
 
 import { Match, MatchResult } from '@/models/match';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Play, ChevronsDown, Plus, AlertCircle } from 'lucide-react';
+import { Play, ChevronsDown, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useRef, useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ function TeamComponent({ team, winner, onPressedChange }: { team: string[], winn
 
     // Filter out empty strings (dummy players) and get player objects
     const teamPlayers = players?.filter((player: Player) => team.includes(player.id)) || [];
-    
+
     // Check if this team has a dummy player (empty string in the team array)
     const hasDummyPlayer = team.includes('');
 
@@ -41,37 +41,36 @@ function TeamComponent({ team, winner, onPressedChange }: { team: string[], winn
 function MatchComponent({ match, onMatchChange, ref }: { match: Match, onMatchChange: (match: Match) => void, ref?: React.Ref<HTMLDivElement> }) {
     return (
         <div ref={ref} className="flex portrait:flex-col landscape:flex-row h-full items-center justify-center snap-start">
-            <TeamComponent 
-                team={match.team1} 
-                winner={match.result == MatchResult.Team1Win} 
+            <TeamComponent
+                team={match.team1}
+                winner={match.result == MatchResult.Team1Win}
                 onPressedChange={(pressed) => {
                     match.result = pressed ? MatchResult.Team1Win : MatchResult.NotPlayed;
                     onMatchChange(match);
-                }} 
+                }}
             />
             <Coin />
-            <TeamComponent 
-                team={match.team2} 
-                winner={match.result == MatchResult.Team2Win} 
+            <TeamComponent
+                team={match.team2}
+                winner={match.result == MatchResult.Team2Win}
                 onPressedChange={(pressed) => {
                     match.result = pressed ? MatchResult.Team2Win : MatchResult.NotPlayed;
                     onMatchChange(match);
-                }} 
+                }}
             />
         </div>
     );
 }
 
-function TableMatches({ tableId, tableName, matches, onMatchChange, generateMatchMutation }: { 
-    tableId: string, 
-    tableName: string, 
-    matches: Match[], 
-    onMatchChange: (match: Match) => void, 
+function TableMatches({ tableId, tableName, matches, onMatchChange, generateMatchMutation }: {
+    tableId: string,
+    tableName: string,
+    matches: Match[],
+    onMatchChange: (match: Match) => void,
     isPrimaryTable: boolean,
-    generateMatchMutation: any
+    generateMatchMutation: ({ mutate: (tableId: string) => void }),
 }) {
     const lastMatchRef = useRef<HTMLDivElement | null>(null);
-    const queryClient = useQueryClient();
     const [scrolledToBottom, setScrolledToBottom] = useState(true);
 
     const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -90,9 +89,9 @@ function TableMatches({ tableId, tableName, matches, onMatchChange, generateMatc
     if (tableMatches.length === 0) {
         return (
             <div className='flex w-full h-full items-center justify-center'>
-                <Button 
-                    variant={'outline'} 
-                    className="cursor-pointer h-auto w-auto" 
+                <Button
+                    variant={'outline'}
+                    className="cursor-pointer h-auto w-auto"
                     onClick={() => {
                         generateMatchMutation.mutate(tableId);
                     }}
@@ -211,14 +210,14 @@ export default function Matches() {
         const allMatches = matches.map(match =>
             match.id === updatedMatch.id ? updatedMatch : match
         );
-        
+
         // Save the updated match
         saveMatchesMutation.mutate(allMatches, {
             onSuccess: () => {
                 // If a winner was selected (match is completed), automatically generate a new match
                 if (updatedMatch.result === MatchResult.Team1Win || updatedMatch.result === MatchResult.Team2Win) {
                     console.log('Match completed, preparing to generate new match');
-                    
+
                     // Force refetch all data to ensure we have the latest state
                     Promise.all([
                         queryClient.invalidateQueries({ queryKey: ['matches'] }),
@@ -249,8 +248,8 @@ export default function Matches() {
 
     // Check if a table has an active match
     const hasActiveMatch = (tableId: string) => {
-        return matches.some(match => 
-            match.tableId === tableId && 
+        return matches.some(match =>
+            match.tableId === tableId &&
             match.result === MatchResult.NotPlayed
         );
     };
@@ -270,7 +269,7 @@ export default function Matches() {
 
     // Get active tables
     const activeTables = tables.filter(table => table.active);
-    
+
     if (activeTables.length === 0) {
         return (
             <div className='flex w-full h-full items-center justify-center flex-col'>
@@ -294,10 +293,10 @@ export default function Matches() {
     // If there's only one active table, show it directly
     if (activeTables.length === 1) {
         return (
-            <TableMatches 
-                tableId={primaryTable.id} 
-                tableName={primaryTable.name} 
-                matches={matches} 
+            <TableMatches
+                tableId={primaryTable.id}
+                tableName={primaryTable.name}
+                matches={matches}
                 onMatchChange={handleMatchChange}
                 isPrimaryTable={true}
                 generateMatchMutation={generateMatchMutation}
@@ -316,13 +315,13 @@ export default function Matches() {
                     // 2. It doesn't have an active match AND
                     // 3. Either the primary table doesn't have enough players OR this table doesn't have enough players
                     const tableHasActiveMatch = hasActiveMatch(table.id);
-                    const shouldDisable = !isPrimaryTable && 
-                                         !tableHasActiveMatch && 
-                                         (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
-                    
+                    const shouldDisable = !isPrimaryTable &&
+                        !tableHasActiveMatch &&
+                        (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
+
                     return (
-                        <TabsTrigger 
-                            key={table.id} 
+                        <TabsTrigger
+                            key={table.id}
                             value={table.id}
                             className={shouldDisable ? "opacity-50 pointer-events-none" : ""}
                         >
@@ -332,36 +331,36 @@ export default function Matches() {
                     );
                 })}
             </TabsList>
-            
+
             {sortedTables.map((table, index) => {
                 const isPrimaryTable = index === 0;
                 const tableHasActiveMatch = hasActiveMatch(table.id);
-                const shouldDisable = !isPrimaryTable && 
-                                     !tableHasActiveMatch && 
-                                     (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
-                
+                const shouldDisable = !isPrimaryTable &&
+                    !tableHasActiveMatch &&
+                    (!primaryTableHasEnoughPlayers || getAvailablePlayerCount(table.id) < 4);
+
                 // Get the previous table name for the message
                 const previousTableName = index > 0 ? sortedTables[index - 1].name : undefined;
-                
+
                 // Check if this table had a match that just finished
-                const hasFinishedMatch = matches.some(match => 
-                    match.tableId === table.id && 
+                const hasFinishedMatch = matches.some(match =>
+                    match.tableId === table.id &&
                     (match.result === MatchResult.Team1Win || match.result === MatchResult.Team2Win)
                 );
-                
+
                 return (
                     <TabsContent key={table.id} value={table.id} className="h-[calc(100%-60px)]">
                         {!shouldDisable ? (
-                            <TableMatches 
-                                tableId={table.id} 
-                                tableName={table.name} 
-                                matches={matches} 
+                            <TableMatches
+                                tableId={table.id}
+                                tableName={table.name}
+                                matches={matches}
                                 onMatchChange={handleMatchChange}
                                 isPrimaryTable={isPrimaryTable}
                                 generateMatchMutation={generateMatchMutation}
                             />
                         ) : (
-                            <NotEnoughPlayersMessage 
+                            <NotEnoughPlayersMessage
                                 isPrimaryTable={isPrimaryTable}
                                 previousTableName={hasFinishedMatch ? previousTableName : undefined}
                             />
