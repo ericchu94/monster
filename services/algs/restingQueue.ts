@@ -1,7 +1,6 @@
 import { Match, MatchResult } from "@/models/match";
 import { fetchPlayers } from "../playerService";
 import { fetchMatches } from "../matchService";
-import { get } from "http";
 import { getAllMatchUps, shuffle } from "./utils";
 
 function combine(n: number, k: number): number[][] {
@@ -67,7 +66,7 @@ function restSequence(n: number): number[][] {
 
 function setsAreEqual<T>(setA: Set<T>, setB: Set<T>): boolean {
     if (setA.size !== setB.size) return false;
-    for (let elem of setA) {
+    for (const elem of setA) {
         if (!setB.has(elem)) return false;
     }
     return true;

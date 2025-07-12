@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { PlayerRanking } from '@/models/playerRanking';
 import { Player } from '@/models/player';
-import { fetchRankings } from '@/services/rankingService';
+import { calculateRankings } from '@/services/rankingService';
 import { fetchPlayers } from '@/services/playerService';
+import { Match } from '@/models/match';
 import {
   Table,
   TableBody,
@@ -16,7 +17,11 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { RankBadge } from "@/components/rank-badge";
 
-export function PlayerRankingTable() {
+interface PlayerRankingTableProps {
+  matches: Match[];
+}
+
+export function PlayerRankingTable({ matches }: PlayerRankingTableProps) {
   const [rankings, setRankings] = useState<PlayerRanking[]>([]);
   const [players, setPlayers] = useState<Record<string, Player>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +30,7 @@ export function PlayerRankingTable() {
     async function loadData() {
       try {
         setIsLoading(true);
-        const rankingsData = await fetchRankings();
+        const rankingsData = await calculateRankings(matches);
         const playersData = await fetchPlayers();
         
         // Create a map of player IDs to player objects for easy lookup
@@ -44,7 +49,7 @@ export function PlayerRankingTable() {
     }
     
     loadData();
-  }, []);
+  }, [matches]);
 
   // Format win rate as percentage
   const formatWinRate = (rate: number): string => {

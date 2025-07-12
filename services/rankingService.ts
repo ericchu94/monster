@@ -1,11 +1,9 @@
-import { Match, MatchResult } from '@/models/match';
-import { fetchMatches } from './matchService';
+import { MatchResult, Match } from '@/models/match';
 import { fetchPlayers } from './playerService';
 import { PlayerRanking } from '@/models/playerRanking';
 
 // Calculate rankings for all players based on match history
-export async function calculateRankings(): Promise<PlayerRanking[]> {
-    const matches = await fetchMatches();
+export async function calculateRankings(matches: Match[]): Promise<PlayerRanking[]> {
     const players = await fetchPlayers();
     
     // Initialize rankings with zero values for all players
@@ -65,26 +63,9 @@ export async function calculateRankings(): Promise<PlayerRanking[]> {
         .sort((a, b) => b.score - a.score);
 }
 
-// Save rankings to localStorage
-export async function saveRankings(rankings: PlayerRanking[]): Promise<PlayerRanking[]> {
-    localStorage.setItem('playerRankings', JSON.stringify(rankings));
-    return rankings;
-}
-
-// Fetch rankings from localStorage
+// Always compute rankings at render time
 export async function fetchRankings(): Promise<PlayerRanking[]> {
-    // Try to get from localStorage first
-    const storedRankings = localStorage.getItem('playerRankings');
-    if (storedRankings) {
-        return JSON.parse(storedRankings);
-    }
-    
-    // If not available, calculate fresh rankings
-    return calculateRankings();
-}
-
-// Update rankings after a match result changes
-export async function updateRankings(): Promise<PlayerRanking[]> {
-    const rankings = await calculateRankings();
-    return saveRankings(rankings);
+    const { fetchMatches } = await import('./matchService');
+    const matches = await fetchMatches();
+    return calculateRankings(matches);
 }

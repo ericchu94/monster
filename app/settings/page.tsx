@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQuery
 import { clearPlayers } from '@/services/playerService';
-import { clearMatches } from '@/services/matchService';
+import { newSession, clearSessions } from '@/services/sessionService';
 import { updateMatchAlgorithm, fetchMatchAlgorithm } from '@/services/matchAlgorithmService'; // Import fetchMatchAlgorithm
 import { MatchAlgorithm } from '@/models/matchAlgorithm';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,25 @@ export default function Settings() {
         },
     });
 
-    const clearMatchesMutation = useMutation({
-        mutationFn: clearMatches,
+    const newSessionMutation = useMutation({
+        mutationFn: newSession,
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ['matches'],
             });
+            // Optionally, invalidate sessions if you add a query for them
+        },
+    });
+
+    const clearSessionsMutation = useMutation({
+        mutationFn: async () => {
+            await clearSessions();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['matches'],
+            });
+            // Optionally, invalidate sessions if you add a query for them
         },
     });
 
@@ -66,9 +79,10 @@ export default function Settings() {
                     </Select>
                 </div>
                 <div>
-                    <Button variant="destructive" className='cursor-pointer m-2' onClick={() => clearMatchesMutation.mutate()}>Clear Matches</Button>
+                    <Button variant="default" className='cursor-pointer m-2' onClick={() => newSessionMutation.mutate()}>New Session</Button>
+                    <Button variant="destructive" className='cursor-pointer m-2' onClick={() => clearSessionsMutation.mutate()}>Clear Sessions</Button>
                     <Button variant="destructive" className='cursor-pointer m-2' onClick={() => {
-                        clearMatchesMutation.mutate();
+                        clearSessionsMutation.mutate();
                         clearPlayersMutation.mutate();
                     }}>Clear All</Button>
                 </div>
