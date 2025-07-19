@@ -19,6 +19,7 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
+import { clearMatches } from '@/services/matchService';
 
 export default function Settings() {
     const queryClient = useQueryClient();
@@ -58,6 +59,7 @@ export default function Settings() {
 
     const clearSessionsMutation = useMutation({
         mutationFn: async () => {
+            await clearMatches();
             await clearSessions();
         },
         onSuccess: () => {
