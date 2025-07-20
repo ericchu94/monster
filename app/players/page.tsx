@@ -5,6 +5,7 @@ import { PlayerComponent } from '@/components/player';
 import { Player } from '@/models/player';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchPlayers, savePlayers } from '@/services/playerService'; // Import from new file
+import { Separator } from '@/components/ui/separator';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,6 +29,21 @@ export default function Players() {
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading players</div>;
 
+    // Sort players alphabetically by name
+    const sortedPlayers = [...(players || [])].sort((a, b) => a.name.localeCompare(b.name));
+    const activePlayers = sortedPlayers.filter(p => p.active);
+    const inactivePlayers = sortedPlayers.filter(p => !p.active);
+
+    // Helper to safely update players
+    const handlePlayerChange = (player: Player) => {
+        if (!players) return;
+        const idx = players.findIndex(p => p.id === player.id);
+        if (idx !== -1) {
+            players[idx] = player;
+            savePlayersMutation.mutate([...players]);
+        }
+    };
+
     return (
         <>
             <div className='flex flex-col w-full h-full'>
@@ -41,11 +57,18 @@ export default function Players() {
                     </h1>
                 </header>
                 <div className='flex flex-wrap'>
-                    {players?.map((player: Player, index) => (
-                        <PlayerComponent key={player.id} player={player} onPlayerChange={(newPlayer) => {
-                            players[index] = newPlayer;
-                            savePlayersMutation.mutate(players);
-                        }} />
+                    {activePlayers.map((player: Player) => (
+                        <PlayerComponent key={player.id} player={player} onPlayerChange={handlePlayerChange} />
+                    ))}
+                </div>
+                {inactivePlayers.length > 0 && (
+                    <div className="w-full my-4">
+                        <Separator />
+                    </div>
+                )}
+                <div className='flex flex-wrap'>
+                    {inactivePlayers.map((player: Player) => (
+                        <PlayerComponent key={player.id} player={player} onPlayerChange={handlePlayerChange} />
                     ))}
                 </div>
             </div>
