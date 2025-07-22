@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Check, X } from "lucide-react";
 
 class PlayerStatistics {
     playerId: string = "";
@@ -42,19 +43,6 @@ function computeStatistics(matches: Match[]): MatchStatistics[] {
             }
         }
 
-        // Deep copy playerStatsMap values
-        const activePlayerStatistics = match.activePlayers.map(playerId => {
-            const stats = playerStatsMap[playerId];
-            return { ...stats }; // Shallow copy to avoid reference issues
-        });
-        const matchStat = new MatchStatistics(match, activePlayerStatistics);
-        matchStatistics.push(matchStat);
-
-        if (match.result === MatchResult.NotPlayed) {
-            // If match is not played, we don't need to update play/rest counts
-            continue;
-        }
-
         for (const playerId of match.team1) {
             playerStatsMap[playerId].playCount++;
             playerStatsMap[playerId].restCount--; // This will get incremented later for active players 
@@ -72,6 +60,13 @@ function computeStatistics(matches: Match[]): MatchStatistics[] {
             playerStatsMap[activePlayer].deviation -= 4 / match.activePlayers.length; // Expected play count
         }
 
+        // Deep copy playerStatsMap values
+        const activePlayerStatistics = match.activePlayers.map(playerId => {
+            const stats = playerStatsMap[playerId];
+            return { ...stats }; // Shallow copy to avoid reference issues
+        });
+        const matchStat = new MatchStatistics(match, activePlayerStatistics);
+        matchStatistics.push(matchStat);
     }
 
     return matchStatistics
@@ -145,10 +140,12 @@ export default function HistoryPage() {
             </main>
         );
     }
-    
-    const matchStatistics = computeStatistics(matches);
 
-    const allPlayerIds = new Set(matches.flatMap(m => m.activePlayers));
+    const playedMatches = matches.filter((m, i) => m.result !== MatchResult.NotPlayed || i == matches.length - 1);
+
+    const matchStatistics = computeStatistics(playedMatches);
+
+    const allPlayerIds = new Set(playedMatches.flatMap(m => m.activePlayers));
     const sortedPlayers = players.filter(p => allPlayerIds.has(p.id)).sort((a, b) => a.name.localeCompare(b.name));
 
     return (
@@ -179,10 +176,10 @@ export default function HistoryPage() {
                                 matchLabel = <span>{team1Names} vs {team2Names}</span>;
                             }
                             return (
-                                <TableRow key={match.id} className={match.result === MatchResult.NotPlayed ? "opacity-70" : ""}>
+                                <TableRow key={match.id}>
                                     <TableCell>{matchLabel}</TableCell>
                                     {sortedPlayers.map((player) => {
-                                        const stats =  matchStatistics.playerStatistics.find(ps => ps.playerId === player.id);
+                                        const stats = matchStatistics.playerStatistics.find(ps => ps.playerId === player.id);
 
                                         if (!stats) {
                                             return (
@@ -193,6 +190,7 @@ export default function HistoryPage() {
                                         return (
                                             <TableCell key={player.id} style={{ background: getDeviationColor(stats.deviation), color: '#fff' }}>
                                                 <div className="flex flex-col text-xs">
+                                                    {match.team1.includes(player.id) || match.team2.includes(player.id) ? <Check className="inline mr-1" /> : <X className="inline mr-1" />}
                                                     <span>Dev: {Number(stats.deviation).toFixed(1)}</span>
                                                     <span>Play: {stats.playCount}</span>
                                                     <span>Rest: {stats.restCount}</span>
