@@ -57,10 +57,10 @@ export async function calculateRankings(matches: Match[]): Promise<PlayerRanking
         // Score is now just wins * 2 (no draws)
         ranking.score = ranking.wins * 2;
     });
-    // Convert to array, filter out players with 0 matches, and sort by score (descending)
+    // Convert to array, filter out players with 0 matches, and sort by win rate (descending)
     return Object.values(rankings)
         .filter(ranking => ranking.matchesPlayed > 0)
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => b.winRate - a.winRate);
 }
 
 // Always compute rankings at render time
